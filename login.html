@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Acceso — Hospital Bienestar Prime</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#3ddb72;--green-mid:#27ae60;--green-dk:#0f5c2e;
+  --bg:#020d0a;--bg2:#040f0b;
+  --glass:rgba(255,255,255,0.04);--glass-h:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.08);--border-g:rgba(61,219,114,0.28);
+  --text:rgba(255,255,255,0.88);--text-dim:rgba(255,255,255,0.42);
+}
+
+/* ── BASE: siempre scroll vertical, sin overflow hidden ── */
+html,body{
+  min-height:100%;
+  font-family:'Montserrat',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-tap-highlight-color:transparent;
+  overflow-x:hidden;
+  overflow-y:auto;
+}
+::selection{background:rgba(61,219,114,0.25)}
+
+/* ── LAYOUT DESKTOP: dos columnas ── */
+.layout{
+  display:grid;
+  grid-template-columns:1fr 480px;
+  min-height:100vh;
+}
+
+/* ─────────── LEFT PANEL ─────────── */
+.left-panel{
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:52px;min-height:100vh;
+}
+.bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.left-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(2,13,10,.98) 0%,rgba(2,13,10,.7) 45%,rgba(2,13,10,.2) 100%),linear-gradient(135deg,rgba(15,92,46,.5) 0%,transparent 55%)}
+.left-shimmer{position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 20% 70%,rgba(61,219,114,.1) 0%,transparent 70%);animation:shimPulse 5s ease-in-out infinite alternate}
+@keyframes shimPulse{from{opacity:.5}to{opacity:1}}
+.left-content{position:relative;z-index:5}
+.left-logo{margin-bottom:36px}
+.ll-line{display:block;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:#fff;line-height:1.05}
+.ll-line .g{color:var(--green)}
+.ll-arrow{color:var(--green);margin-right:2px}
+.ll-sub{display:block;font-size:7px;letter-spacing:2.5px;color:rgba(255,255,255,.35);text-transform:uppercase;margin-top:4px}
+.left-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,5.5vw,78px);line-height:.92;letter-spacing:-1px;margin-bottom:18px}
+.left-title .outline{-webkit-text-stroke:1.5px rgba(255,255,255,.2);color:transparent;display:block}
+.left-title .accent{color:var(--green);display:block}
+.left-desc{font-size:11.5px;line-height:1.85;color:var(--text-dim);max-width:380px;font-style:italic;margin-bottom:32px}
+.left-pills{display:flex;flex-direction:column;gap:10px}
+.pill{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:30px;padding:8px 16px;font-size:9.5px;color:rgba(255,255,255,.6);width:fit-content}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+
+/* ─────────── RIGHT PANEL ─────────── */
+.right-panel{
+  background:var(--bg2);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;
+  overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.06) transparent;
+}
+.right-panel::-webkit-scrollbar{width:4px}
+.right-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.06);border-radius:2px}
+.right-inner{
+  flex:1;display:flex;flex-direction:column;justify-content:center;
+  padding:40px 48px;min-height:100vh;
+}
+
+/* ─────────── ELEMENTOS ─────────── */
+.back-link{display:inline-flex;align-items:center;gap:7px;font-size:8.5px;letter-spacing:2px;font-weight:700;text-transform:uppercase;color:var(--text-dim);text-decoration:none;transition:color .2s;margin-bottom:36px;width:fit-content}
+.back-link:hover{color:#fff}
+.back-link svg{width:14px;height:14px;stroke-width:2}
+
+.steps-indicator{display:flex;align-items:center;margin-bottom:36px}
+.step-ind{display:flex;align-items:center;gap:8px}
+.step-ind-num{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--text-dim);transition:all .3s;flex-shrink:0}
+.step-ind.done .step-ind-num{background:var(--green);border-color:var(--green);color:#020d0a}
+.step-ind.active .step-ind-num{border-color:var(--green);color:var(--green)}
+.step-ind-label{font-size:8px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;color:var(--text-dim);transition:color .3s;white-space:nowrap}
+.step-ind.active .step-ind-label{color:var(--green)}
+.step-ind.done .step-ind-label{color:rgba(255,255,255,.55)}
+.step-connector{flex:1;height:1px;background:var(--border);margin:0 12px;transition:background .4s;min-width:20px}
+.step-connector.done{background:var(--green-dk)}
+
+.step-panel{display:none;animation:fadeUp .35s ease}
+.step-panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.panel-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,3.5vw,40px);line-height:.95;color:#fff;margin-bottom:6px}
+.panel-title span{color:var(--green)}
+.panel-sub{font-size:10.5px;line-height:1.7;color:var(--text-dim);margin-bottom:28px}
+
+/* Role cards */
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.role-card{border:1.5px solid var(--border);border-radius:8px;padding:20px 16px;cursor:pointer;position:relative;overflow:hidden;background:var(--glass);transition:border-color .25s,background .25s,transform .2s}
+.role-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--green);transform:scaleX(0);transform-origin:left;transition:transform .35s ease}
+.role-card:hover{border-color:var(--border-g);background:var(--glass-h);transform:translateY(-2px)}
+.role-card:hover::before,.role-card.selected::before{transform:scaleX(1)}
+.role-card.selected{border-color:var(--green);background:rgba(61,219,114,.07)}
+.role-card.selected .role-check{opacity:1}
+.role-icon{width:40px;height:40px;border-radius:9px;background:rgba(61,219,114,.1);border:1px solid var(--border-g);display:flex;align-items:center;justify-content:center;margin-bottom:12px;transition:background .25s}
+.role-card:hover .role-icon,.role-card.selected .role-icon{background:rgba(61,219,114,.18)}
+.role-icon svg{width:20px;height:20px;stroke:var(--green);stroke-width:1.7}
+.role-title{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:.5px;color:#fff;margin-bottom:4px}
+.role-desc{font-size:9px;line-height:1.6;color:var(--text-dim)}
+.role-check{position:absolute;top:10px;right:10px;width:18px;height:18px;border-radius:50%;background:var(--green);border:1.5px solid var(--green);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
+.role-check svg{width:10px;height:10px;stroke:#020d0a;stroke-width:2.5}
+
+.admin-code-wrap{display:none;margin-bottom:20px;animation:fadeUp .3s ease}
+.admin-code-wrap.show{display:block}
+.admin-code-note{display:flex;align-items:flex-start;gap:10px;background:rgba(61,219,114,.05);border:1px solid var(--border-g);border-radius:6px;padding:12px 14px;margin-bottom:14px}
+.admin-code-note svg{width:15px;height:15px;stroke:var(--green);flex-shrink:0;margin-top:1px}
+.admin-code-note p{font-size:10px;line-height:1.6;color:rgba(255,255,255,.6)}
+
+.auth-toggle{display:flex;margin-bottom:28px;background:var(--glass);border:1px solid var(--border);border-radius:8px;overflow:hidden;padding:4px;gap:4px}
+.auth-tab{flex:1;padding:10px;border-radius:5px;background:none;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9.5px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;color:var(--text-dim);transition:all .22s}
+.auth-tab.active{background:rgba(255,255,255,.08);color:#fff}
+
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:7.5px;letter-spacing:2px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:7px}
+.form-input,.form-select{width:100%;background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:12px 14px;font-family:'Montserrat',sans-serif;font-size:12px;color:var(--text);outline:none;transition:border-color .2s,background .2s;-webkit-appearance:none}
+.form-input::placeholder{color:rgba(255,255,255,.18)}
+.form-input:focus{border-color:var(--border-g);background:rgba(61,219,114,.03)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.pw-wrap{position:relative}
+.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-dim);padding:4px;display:flex;align-items:center;transition:color .2s}
+.pw-toggle:hover{color:#fff}
+.pw-toggle svg{width:15px;height:15px;stroke-width:1.8}
+
+.strength-bar{height:3px;border-radius:2px;margin-top:8px;background:var(--border);overflow:hidden}
+.strength-fill{height:100%;border-radius:2px;width:0%;transition:width .4s,background .4s}
+
+.form-footer{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;font-size:9.5px;flex-wrap:wrap;gap:8px}
+.remember-wrap{display:flex;align-items:center;gap:8px;cursor:pointer}
+.remember-wrap input[type="checkbox"]{accent-color:var(--green);width:14px;height:14px;cursor:pointer}
+.remember-label{color:var(--text-dim)}
+.forgot-link{color:var(--green);text-decoration:none;font-size:9.5px;font-weight:600}
+.forgot-link:hover{text-decoration:underline}
+
+.submit-btn{width:100%;padding:15px;background:var(--green);border:none;border-radius:6px;font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;font-weight:700;text-transform:uppercase;color:#020d0a;cursor:pointer;transition:background .25s,transform .2s,box-shadow .25s;box-shadow:0 0 28px rgba(61,219,114,.25);display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:20px}
+.submit-btn:hover:not(:disabled){background:#5df08d;transform:translateY(-2px);box-shadow:0 4px 36px rgba(61,219,114,.4)}
+.submit-btn:disabled{opacity:.45;cursor:not-allowed}
+.submit-btn svg{width:15px;height:15px;stroke-width:2.2;flex-shrink:0}
+
+.switch-link{text-align:center;font-size:10px;color:var(--text-dim)}
+.switch-link a{color:var(--green);text-decoration:none;font-weight:700}
+.switch-link a:hover{text-decoration:underline}
+
+.error-msg{display:none;align-items:center;gap:9px;background:rgba(219,61,61,.1);border:1px solid rgba(219,61,61,.3);border-radius:5px;padding:11px 14px;margin-bottom:16px;font-size:10.5px;color:#e07070}
+.error-msg.show{display:flex}
+.error-msg svg{width:15px;height:15px;stroke:#e07070;flex-shrink:0}
+
+.success-screen{display:none;text-align:center;animation:fadeUp .4s ease;padding:20px 0}
+.success-screen.show{display:block}
+.success-icon{width:72px;height:72px;border-radius:50%;background:rgba(61,219,114,.12);border:2px solid var(--border-g);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;animation:scalePop .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes scalePop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.success-icon svg{width:32px;height:32px;stroke:var(--green);stroke-width:2}
+.success-title{font-family:'Bebas Neue',sans-serif;font-size:32px;color:#fff;margin-bottom:10px}
+.success-sub{font-size:11px;color:var(--text-dim);line-height:1.7;margin-bottom:28px}
+.redirect-btn{display:inline-flex;align-items:center;gap:10px;background:var(--green);color:#020d0a;font-size:9px;letter-spacing:2.5px;font-weight:700;text-transform:uppercase;text-decoration:none;padding:14px 28px;border-radius:6px;transition:background .25s}
+.redirect-btn:hover{background:#5df08d}
+
+.info-banner{display:flex;align-items:center;gap:10px;background:rgba(61,219,114,.06);border:1px solid var(--border-g);border-radius:6px;padding:10px 14px;margin-bottom:20px;font-size:10px;color:rgba(255,255,255,.6)}
+.info-banner svg{width:14px;height:14px;stroke:var(--green);flex-shrink:0}
+
+/* ════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════ */
+
+/* ── TABLET 860px: apila las dos columnas ── */
+@media(max-width:860px){
+  .layout{
+    grid-template-columns:1fr;
+    grid-template-rows:auto auto;
+    min-height:100vh;
+  }
+  .left-panel{
+    min-height:220px;
+    padding:36px 24px 28px;
+    justify-content:flex-end;
+  }
+  .left-pills{display:none}
+  .left-desc{display:none}
+  .left-title{font-size:clamp(34px,8vw,56px)}
+  .right-panel{border-left:none;border-top:1px solid var(--border)}
+  .right-inner{
+    padding:28px 32px 48px;
+    min-height:auto;
+    justify-content:flex-start;
+  }
+  .form-row{grid-template-columns:1fr 1fr}
+}
+
+/* ── MÓVIL 600px ── */
+@media(max-width:600px){
+  .left-panel{min-height:170px;padding:24px 20px 20px}
+  .left-title{font-size:clamp(28px,9vw,42px)}
+  .left-logo .ll-line{font-size:16px}
+  .right-inner{padding:22px 20px 48px}
+  .back-link{margin-bottom:24px}
+  .steps-indicator{margin-bottom:24px}
+  .step-ind-label{display:none}  /* ocultar labels en móvil pequeño */
+  .role-grid{gap:9px}
+  .role-card{padding:16px 12px}
+  .role-icon{width:34px;height:34px;margin-bottom:9px}
+  .role-icon svg{width:17px;height:17px}
+  .role-title{font-size:14px}
+  .role-desc{font-size:8.5px}
+  .panel-title{font-size:clamp(22px,6vw,30px)}
+  .panel-sub{margin-bottom:20px}
+  .auth-toggle{margin-bottom:20px}
+  .form-row{grid-template-columns:1fr}
+  .form-footer{flex-direction:column;align-items:flex-start;gap:10px}
+  .submit-btn{padding:14px;font-size:8.5px}
+  .admin-code-note p{font-size:9.5px}
+}
+
+/* ── MÓVIL PEQUEÑO 380px ── */
+@media(max-width:380px){
+  .left-panel{min-height:130px;padding:18px 16px}
+  .left-title{font-size:26px}
+  .right-inner{padding:18px 16px 48px}
+  .role-grid{grid-template-columns:1fr 1fr;gap:7px}
+  .role-card[data-role="paciente"]{grid-column:span 2}
+  .role-card{padding:13px 10px}
+  .role-title{font-size:13px}
+  .role-desc{display:none}
+  .form-input,.form-select{padding:11px 12px;font-size:11px}
+  .submit-btn{font-size:8px;letter-spacing:1.5px}
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- LEFT -->
+  <div class="left-panel">
+    <video class="bg-video" autoplay muted loop playsinline>
+      <source src="/fondos/3161306-hd_1920_1080_24fps.mp4" type="video/mp4">
+    </video>
+    <div class="left-overlay"></div>
+    <div class="left-shimmer"></div>
+    <div class="left-content">
+      <div class="left-logo">
+        <span class="ll-line">HOSPI<span class="g">TAL</span></span>
+        <span class="ll-line"><span class="ll-arrow">&#8592;</span>BIENE<span class="g">STAR</span></span>
+        <span class="ll-sub">Tu salud &middot; Prime &middot; Tu vida</span>
+      </div>
+      <h1 class="left-title">
+        <span class="outline">ACCESO</span>
+        <span class="accent">AL SISTEMA</span>
+      </h1>
+      <p class="left-desc">Plataforma centralizada para la gestión de pacientes, citas médicas e historiales clínicos. Acceso seguro para todo el personal.</p>
+      <div class="left-pills">
+        <div class="pill"><div class="pill-dot"></div>Gestión de pacientes y expedientes</div>
+        <div class="pill"><div class="pill-dot"></div>Agenda y control de citas médicas</div>
+        <div class="pill"><div class="pill-dot"></div>Historial clínico digital centralizado</div>
+        <div class="pill"><div class="pill-dot"></div>Reportes y estadísticas en tiempo real</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-panel">
+    <div class="right-inner">
+      <a class="back-link" href="inicio.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
+        Volver al sitio
+      </a>
+
+      <div class="steps-indicator" id="stepsIndicator">
+        <div class="step-ind active" id="stepInd1">
+          <div class="step-ind-num">1</div>
+          <div class="step-ind-label">Tipo de usuario</div>
+        </div>
+        <div class="step-connector" id="stepConn1"></div>
+        <div class="step-ind" id="stepInd2">
+          <div class="step-ind-num">2</div>
+          <div class="step-ind-label">Acceso</div>
+        </div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div class="step-panel active" id="step1">
+        <div class="panel-title">¿QUIÉN <span>ERES?</span></div>
+        <p class="panel-sub">Selecciona tu tipo de usuario para continuar.</p>
+
+        <div class="role-grid" id="roleGrid">
+          <div class="role-card" data-role="admin">
+            <div class="role-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div class="role-title">ADMINISTRADOR</div>
+            <div class="role-desc">Acceso completo: pacientes, citas, reportes y personal.</div>
+            <div class="role-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div class="role-card" data-role="doctor">
+            <div class="role-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            <div class="role-title">MÉDICO</div>
+            <div class="role-desc">Consulta, historial clínico y recetas de tus pacientes.</div>
+            <div class="role-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div class="role-card" data-role="enfermera">
+            <div class="role-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div class="role-title">ENFERMERA</div>
+            <div class="role-desc">Signos vitales, rondas y seguimiento de pacientes.</div>
+            <div class="role-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div class="role-card" data-role="limpieza">
+            <div class="role-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+            <div class="role-title">LIMPIEZA</div>
+            <div class="role-desc">Checklist de habitaciones y reportes de mantenimiento.</div>
+            <div class="role-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div class="role-card" data-role="paciente" style="grid-column:span 2">
+            <div class="role-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="role-title">PACIENTE</div>
+            <div class="role-desc">Agenda citas, consulta tus próximas visitas y revisa tu historial.</div>
+            <div class="role-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+        </div>
+
+        <div class="admin-code-wrap" id="adminCodeWrap">
+          <div class="admin-code-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p id="adminCodeMsg">El acceso requiere un código institucional.</p>
+          </div>
+          <label class="form-label" >CÓDIGO INSTITUCIONAL</label>
+          <input class="form-input" type="password" id="adminCodeInput" placeholder="••••••••">
+        </div>
+
+        <button class="submit-btn" id="step1Btn" disabled>CONTINUAR <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></button>
+        <div class="switch-link">¿Primera vez aquí? <a href="#" id="createAccountLink">Crear cuenta</a></div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step-panel" id="step2">
+        <div class="auth-toggle" id="authToggle">
+          <button class="auth-tab active" id="tabLogin">Iniciar Sesión</button>
+          <button class="auth-tab" id="tabRegister">Registrarse</button>
+        </div>
+
+        <div style="margin-bottom:20px">
+          <div class="pill" id="selectedRolePill" style="border-color:var(--border-g);color:var(--green)">
+            <div class="pill-dot"></div>
+            <span id="pillRoleText">Administrador</span>
+          </div>
+          <button id="backToStep1Btn" style="background:none;border:none;cursor:pointer;font-size:8.5px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;color:var(--text-dim);margin-top:8px;padding:0;display:block">← Cambiar tipo de usuario</button>
+        </div>
+
+        <div class="error-msg" id="errorMsg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <span id="errorText">Credenciales incorrectas.</span>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div id="loginForm">
+          <div class="panel-title">BIENVENIDO <span>DE VUELTA</span></div>
+          <p class="panel-sub">Ingresa tus credenciales para acceder al sistema.</p>
+          <div class="form-group">
+            <label class="form-label">Correo electrónico</label>
+            <input class="form-input" type="email" id="loginEmail" placeholder="correo@bienestar.mx">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contraseña</label>
+            <div class="pw-wrap">
+              <input class="form-input" type="password" id="loginPw" placeholder="••••••••" style="padding-right:42px">
+              <button class="pw-toggle" type="button" data-target="loginPw">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-footer">
+            <label class="remember-wrap"><input type="checkbox" id="rememberMe"><span class="remember-label">Recordarme</span></label>
+            <a class="forgot-link" href="#" id="forgotPwLink">¿Olvidaste tu contraseña?</a>
+          </div>
+          <button class="submit-btn" id="loginBtn">INGRESAR AL SISTEMA <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <div class="switch-link">¿No tienes cuenta? <a href="#" id="switchToRegister">Regístrate aquí</a></div>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="registerForm" style="display:none">
+          <div class="panel-title">CREAR <span>CUENTA</span></div>
+          <p class="panel-sub" id="registerSub">Completa tus datos para registrarte.</p>
+          <div class="info-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Los pacientes pueden registrarse libremente. El personal necesita código.
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Nombre(s)</label><input class="form-input" type="text" id="regNombre" placeholder="Juan"></div>
+            <div class="form-group"><label class="form-label">Apellidos</label><input class="form-input" type="text" id="regApellidos" placeholder="García López"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Correo electrónico</label><input class="form-input" type="email" id="regEmail" placeholder="correo@bienestar.mx"></div>
+          <div id="extraFields"></div>
+          <div class="form-group">
+            <label class="form-label">Contraseña</label>
+            <div class="pw-wrap">
+              <input class="form-input" type="password" id="regPw" placeholder="Mínimo 6 caracteres" style="padding-right:42px">
+              <button class="pw-toggle" type="button" data-target="regPw">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirmar contraseña</label>
+            <div class="pw-wrap">
+              <input class="form-input" type="password" id="regPw2" placeholder="Repite tu contraseña" style="padding-right:42px">
+              <button class="pw-toggle" type="button" data-target="regPw2">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <button class="submit-btn" id="registerBtn">CREAR MI CUENTA <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <div class="switch-link">¿Ya tienes cuenta? <a href="#" id="switchToLogin">Inicia sesión</a></div>
+        </div>
+      </div>
+
+      <!-- SUCCESS -->
+      <div class="success-screen" id="successScreen">
+        <div class="success-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <div class="success-title" id="successTitle">¡ACCESO EXITOSO!</div>
+        <p class="success-sub" id="successSub">Redirigiendo al panel...</p>
+        <a class="redirect-btn" id="redirectBtn" href="#">IR AL PANEL <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Códigos institucionales (en producción valídalos en backend/Firestore) ──
+const INSTITUTIONAL_CODES = {
+  admin:     'ADMIN2025',
+  doctor:    'MED2025',
+  enfermera: 'ENF2025',
+  limpieza:  'LIMP2025'
+};
+
+const ROLE_CONFIG = {
+  admin:     { label: 'Administrador', needsCode: true,  redirect: 'admin.html',     extraFields: () => '' },
+  doctor:    { label: 'Médico',        needsCode: true,  redirect: 'doctor.html',    extraFields: extraDoctor },
+  enfermera: { label: 'Enfermera',     needsCode: true,  redirect: 'enfermera.html', extraFields: extraEnfermera },
+  limpieza:  { label: 'Limpieza',      needsCode: true,  redirect: 'limpieza.html',  extraFields: extraLimpieza },
+  paciente:  { label: 'Paciente',      needsCode: false, redirect: 'citas.html',     extraFields: extraPatient }
+};
+
+let selectedRole = null;
+
+function extraDoctor() {
+  return `<div class="form-group"><label class="form-label">Especialidad</label><input class="form-input" type="text" id="regEspecialidad" placeholder="Ej: Cardiología"></div>
+          <div class="form-group"><label class="form-label">Cédula Profesional</label><input class="form-input" type="text" id="regCedula" placeholder="7 dígitos"></div>`;
+}
+function extraEnfermera() {
+  return `<div class="form-group"><label class="form-label">Número de empleado</label><input class="form-input" type="text" id="regEmpleado" placeholder="ENF-001"></div>
+          <div class="form-group"><label class="form-label">Área de trabajo</label><input class="form-input" type="text" id="regArea" placeholder="Urgencias, Pediatría…"></div>`;
+}
+function extraLimpieza() {
+  return `<div class="form-group"><label class="form-label">Número de empleado</label><input class="form-input" type="text" id="regEmpleado" placeholder="LIMP-001"></div>
+          <div class="form-group"><label class="form-label">Zona asignada</label><input class="form-input" type="text" id="regZona" placeholder="Piso 1, Urgencias…"></div>`;
+}
+function extraPatient() {
+  return `<div class="form-group"><label class="form-label">CURP</label><input class="form-input" type="text" id="regCURP" placeholder="GARL900101HDFRCN08" maxlength="18"></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Teléfono</label><input class="form-input" type="tel" id="regTelefono" placeholder="442 123 4567"></div>
+            <div class="form-group"><label class="form-label">Fecha de nacimiento</label><input class="form-input" type="date" id="regFechaNac"></div>
+          </div>`;
+}
+
+function selectRole(card) {
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedRole = card.dataset.role;
+  const cfg = ROLE_CONFIG[selectedRole];
+  const codeWrap = document.getElementById('adminCodeWrap');
+
+  if (cfg.needsCode) {
+    codeWrap.classList.add('show');
+    document.getElementById('adminCodeMsg').innerHTML = `El acceso de <strong>${cfg.label}</strong> requiere un código institucional.`;
+    document.getElementById('adminCodeInput').value = '';
+    document.getElementById('adminCodeInput').oninput = () => {
+      enableStep1Btn(document.getElementById('adminCodeInput').value.trim().length >= 4);
+    };
+    enableStep1Btn(false);
+  } else {
+    codeWrap.classList.remove('show');
+    enableStep1Btn(true);
+  }
+}
+
+function enableStep1Btn(enabled) {
+  const btn = document.getElementById('step1Btn');
+  btn.disabled = !enabled;
+}
+
+function goToStep2(mode) {
+  if (!selectedRole) {
+    if (mode === 'register') { selectRole(document.querySelector('[data-role="paciente"]')); }
+    else return;
+  }
+  // Validar código institucional si aplica
+  if (ROLE_CONFIG[selectedRole].needsCode && mode !== 'register') {
+    const code = document.getElementById('adminCodeInput').value.trim();
+    if (code !== INSTITUTIONAL_CODES[selectedRole]) {
+      document.getElementById('adminCodeInput').style.borderColor = 'rgba(219,61,61,0.6)';
+      return;
+    }
+  }
+
+  document.getElementById('stepInd1').classList.remove('active');
+  document.getElementById('stepInd1').classList.add('done');
+  document.getElementById('stepInd1').querySelector('.step-ind-num').innerHTML =
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg>`;
+  document.getElementById('stepConn1').classList.add('done');
+  document.getElementById('stepInd2').classList.add('active');
+  document.getElementById('pillRoleText').textContent = ROLE_CONFIG[selectedRole].label;
+  document.getElementById('extraFields').innerHTML = ROLE_CONFIG[selectedRole].extraFields();
+  document.getElementById('step1').classList.remove('active');
+  document.getElementById('step2').classList.add('active');
+  if (mode === 'register') switchAuth('register');
+}
+
+function backToStep1() {
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('step1').classList.add('active');
+  document.getElementById('stepInd1').classList.remove('done');
+  document.getElementById('stepInd1').classList.add('active');
+  document.getElementById('stepInd1').querySelector('.step-ind-num').textContent = '1';
+  document.getElementById('stepConn1').classList.remove('done');
+  document.getElementById('stepInd2').classList.remove('active');
+}
+
+function switchAuth(mode) {
+  document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
+  document.getElementById('tabRegister').classList.toggle('active', mode === 'register');
+  document.getElementById('loginForm').style.display = mode === 'login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = mode === 'register' ? 'block' : 'none';
+  document.getElementById('errorMsg').classList.remove('show');
+  if (mode === 'register') {
+    document.getElementById('registerSub').innerHTML = `Datos para registrarte como <strong style="color:var(--green)">${ROLE_CONFIG[selectedRole]?.label || 'Paciente'}</strong>.`;
+  }
+}
+
+function togglePassword(btn) {
+  const inp = document.getElementById(btn.getAttribute('data-target'));
+  if (!inp) return;
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  btn.innerHTML = show
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+}
+
+function checkStrength(val) {
+  const fill = document.getElementById('strengthFill');
+  let score = 0;
+  if (val.length >= 6) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+  fill.style.width  = [0,25,50,75,100][score] + '%';
+  fill.style.background = ['','#e05252','#dbb63d','#3ddb72','#27ae60'][score];
+}
+
+window.showAuthError = (msg) => {
+  document.getElementById('errorText').textContent = msg;
+  document.getElementById('errorMsg').classList.add('show');
+};
+window.hideAuthError = () => document.getElementById('errorMsg').classList.remove('show');
+window.showAuthSuccess = (title, subtitle, redirectUrl) => {
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('successTitle').textContent  = title;
+  document.getElementById('successSub').textContent    = subtitle;
+  document.getElementById('redirectBtn').href = redirectUrl;
+  document.getElementById('successScreen').classList.add('show');
+};
+
+// Listeners UI
+document.querySelectorAll('.role-card').forEach(c => c.addEventListener('click', () => selectRole(c)));
+document.getElementById('step1Btn').addEventListener('click', () => goToStep2('login'));
+document.getElementById('createAccountLink').addEventListener('click', (e) => { e.preventDefault(); goToStep2('register'); });
+document.getElementById('backToStep1Btn').addEventListener('click', backToStep1);
+document.getElementById('switchToRegister').addEventListener('click', (e) => { e.preventDefault(); switchAuth('register'); });
+document.getElementById('switchToLogin').addEventListener('click', (e) => { e.preventDefault(); switchAuth('login'); });
+document.querySelectorAll('.pw-toggle').forEach(btn => btn.addEventListener('click', () => togglePassword(btn)));
+document.getElementById('regPw')?.addEventListener('input', e => checkStrength(e.target.value));
+document.getElementById('tabLogin').addEventListener('click', () => switchAuth('login'));
+document.getElementById('tabRegister').addEventListener('click', () => switchAuth('register'));
+</script>
+
+<!-- FIREBASE MODULE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCtve3i6HRbmigXrRIXNa8A2KmNCItqurw",
+  authDomain: "hospital-bienestar.firebaseapp.com",
+  projectId: "hospital-bienestar",
+  storageBucket: "hospital-bienestar.firebasestorage.app",
+  messagingSenderId: "296686621012",
+  appId: "1:296686621012:web:2664e71671f69ec17278c1"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const ROLE_ROUTES = {
+  admin:     'admin.html',
+  doctor:    'doctor.html',
+  enfermera: 'enfermera.html',
+  limpieza:  'limpieza.html',
+  paciente:  'citas.html'
+};
+
+// ── Busca el usuario en 'usuarios' y en colecciones por rol ──────────────
+async function resolveUserData(uid) {
+  const { query, collection, where, getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+
+  // 1. Buscar por ID de documento = uid (caso normal)
+  const snap1 = await getDoc(doc(db, 'usuarios', uid));
+  if (snap1.exists()) return snap1.data();
+
+  // 2. Buscar en colecciones por rol, primero por ID luego por campo uid
+  for (const col of ['admin','doctor','enfermera','limpieza','paciente']) {
+    // 2a. Por ID del documento
+    const snapId = await getDoc(doc(db, col, uid));
+    if (snapId.exists()) {
+      const d = snapId.data();
+      if (!d.rol) d.rol = col;
+      return d;
+    }
+    // 2b. Por campo uid dentro del documento (tu estructura actual)
+    try {
+      const q = query(collection(db, col), where('uid', '==', uid));
+      const qsnap = await getDocs(q);
+      if (!qsnap.empty) {
+        const d = qsnap.docs[0].data();
+        if (!d.rol) d.rol = col;
+        return d;
+      }
+    } catch(_) {}
+  }
+  return null;
+}
+
+// Si ya está logueado, redirige directo (sin esperar UI)
+let redirecting = false;
+onAuthStateChanged(auth, async (user) => {
+  if (user && !redirecting) {
+    const data = await resolveUserData(user.uid);
+    if (data && data.activo !== false) {
+      redirecting = true;
+      window.location.href = ROLE_ROUTES[data.rol] || 'citas.html';
+    }
+  }
+});
+
+// LOGIN
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw    = document.getElementById('loginPw').value;
+  const btn   = document.getElementById('loginBtn');
+  if (!email || !pw) { window.showAuthError('Completa todos los campos.'); return; }
+
+  btn.disabled = true; btn.textContent = 'PROCESANDO…';
+  window.hideAuthError();
+
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, pw);
+    const data = await resolveUserData(cred.user.uid);
+
+    if (!data) { throw { code: 'user-not-in-db' }; }
+    if (data.activo === false) { throw { code: 'account-disabled' }; }
+
+    // Verificar que el rol coincide con el seleccionado en la UI
+    const selectedRoleEl = document.querySelector('.role-card.selected');
+    if (selectedRoleEl) {
+      const uiRole = selectedRoleEl.dataset.role;
+      const dbRole = data.rol;
+      if (uiRole !== dbRole) {
+        await auth.signOut();
+        throw { code: 'role-mismatch' };
+      }
+    }
+
+    const destino = ROLE_ROUTES[data.rol] || 'citas.html';
+    redirecting = true;
+    window.showAuthSuccess('¡ACCESO EXITOSO!', `Bienvenido, ${data.nombre || ''}.`, destino);
+    setTimeout(() => { window.location.href = destino; }, 1800);
+  } catch (err) {
+    btn.disabled = false; btn.innerHTML = 'INGRESAR AL SISTEMA <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="15" height="15"><polyline points="9 18 15 12 9 6"/></svg>';
+    const msgs = {
+      'auth/user-not-found':   'No existe cuenta con ese correo.',
+      'auth/wrong-password':   'Contraseña incorrecta.',
+      'auth/invalid-email':    'Correo no válido.',
+      'auth/invalid-credential':'Credenciales incorrectas.',
+      'auth/too-many-requests':'Demasiados intentos. Espera unos minutos.',
+      'user-not-in-db':        'Usuario no encontrado en el sistema.',
+      'account-disabled':      'Cuenta desactivada. Contacta al administrador.',
+      'role-mismatch':         'Este correo no corresponde al rol seleccionado.'
+    };
+    window.showAuthError(msgs[err.code] || `Error: ${err.message}`);
+  }
+});
+
+// REGISTER
+document.getElementById('registerBtn').addEventListener('click', async () => {
+  const pw  = document.getElementById('regPw').value;
+  const pw2 = document.getElementById('regPw2').value;
+  const btn = document.getElementById('registerBtn');
+
+  if (pw.length < 6)  { window.showAuthError('La contraseña debe tener al menos 6 caracteres.'); return; }
+  if (pw !== pw2)     { window.showAuthError('Las contraseñas no coinciden.'); return; }
+
+  const nombre    = document.getElementById('regNombre')?.value.trim();
+  const apellidos = document.getElementById('regApellidos')?.value.trim();
+  const email     = document.getElementById('regEmail')?.value.trim();
+  if (!nombre || !apellidos || !email) { window.showAuthError('Completa nombre, apellidos y correo.'); return; }
+
+  const selectedRoleEl = document.querySelector('.role-card.selected');
+  const rolUI = selectedRoleEl?.dataset.role || 'paciente';
+  const rolDB = rolUI === 'patient' ? 'paciente' : rolUI;
+
+  btn.disabled = true; btn.textContent = 'PROCESANDO…';
+  window.hideAuthError();
+
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pw);
+    const uid  = cred.user.uid;
+
+    const userData = { uid, nombre, apellidos, email, rol: rolDB, creadoEn: serverTimestamp(), activo: true };
+    if (rolDB === 'doctor')    { userData.especialidad = document.getElementById('regEspecialidad')?.value || ''; userData.cedula = document.getElementById('regCedula')?.value || ''; }
+    if (rolDB === 'enfermera') { userData.numEmpleado = document.getElementById('regEmpleado')?.value || ''; userData.area = document.getElementById('regArea')?.value || ''; }
+    if (rolDB === 'limpieza')  { userData.numEmpleado = document.getElementById('regEmpleado')?.value || ''; userData.zonaAsignada = document.getElementById('regZona')?.value || ''; }
+    if (rolDB === 'paciente')  { userData.curp = document.getElementById('regCURP')?.value || ''; userData.telefono = document.getElementById('regTelefono')?.value || ''; userData.fechaNacimiento = document.getElementById('regFechaNac')?.value || ''; }
+
+    await setDoc(doc(db, 'usuarios', uid), userData);
+
+    const destino = ROLE_ROUTES[rolDB] || 'citas.html';
+    redirecting = true;
+    window.showAuthSuccess('¡CUENTA CREADA!', `Tu cuenta de ${rolDB} ha sido registrada.`, destino);
+    setTimeout(() => { window.location.href = destino; }, 1800);
+  } catch (err) {
+    btn.disabled = false; btn.innerHTML = 'CREAR MI CUENTA <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="15" height="15"><polyline points="9 18 15 12 9 6"/></svg>';
+    const msgs = { 'auth/email-already-in-use': 'Este correo ya está registrado.', 'auth/weak-password': 'Contraseña muy débil.' };
+    window.showAuthError(msgs[err.code] || `Error: ${err.message}`);
+  }
+});
+
+// FORGOT PASSWORD
+document.getElementById('forgotPwLink').addEventListener('click', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email) { window.showAuthError('Escribe tu correo primero.'); return; }
+  try {
+    await sendPasswordResetEmail(auth, email);
+    window.hideAuthError();
+    alert('Se envió un enlace de recuperación a ' + email);
+  } catch(err) {
+    window.showAuthError('No se pudo enviar el correo. Verifica el email.');
+  }
+});
+</script>
+</body>
+</html>

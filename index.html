@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hospital Bienestar Prime</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100vw; height:100vh; overflow:hidden; font-family:'Montserrat', sans-serif; background:#020d0a; }
+  .wrapper { width:100vw; height:100vh; position:relative; overflow:hidden; }
+  .slides-container { position:absolute; inset:0; width:100%; height:100%; }
+  .slide { position:absolute; inset:0; width:100%; height:100%; opacity:0; transition:opacity 1s ease; pointer-events:none; }
+  .slide.active { opacity:1; pointer-events:all; }
+  .bg-video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; }
+  .left-overlay { position:absolute; left:0; top:0; width:52%; height:100%; background:linear-gradient(to right,rgba(4,14,10,0.93) 0%,rgba(4,14,10,0.88) 50%,rgba(4,14,10,0.35) 80%,transparent 100%); z-index:2; pointer-events:none; }
+  .left-blur { position:absolute; left:0; top:0; width:48%; height:100%; backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); z-index:1; pointer-events:none; -webkit-mask-image:linear-gradient(to right,black 60%,transparent 100%); mask-image:linear-gradient(to right,black 60%,transparent 100%); }
+  .right-overlay { position:absolute; right:0; top:0; width:55%; height:100%; background:linear-gradient(to left,rgba(4,14,10,0.3) 0%,transparent 55%); z-index:2; pointer-events:none; }
+  .divider { position:absolute; left:48%; top:12%; height:76%; width:1px; background:rgba(255,255,255,0.08); z-index:3; }
+  nav { position:absolute; top:0; left:0; right:0; z-index:30; display:flex; align-items:center; justify-content:space-between; padding:18px 40px 0 22px; }
+  .logo { position:relative; line-height:1.05; }
+  .logo-line { display:block; font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:3px; color:#fff; }
+  .logo-line .g { color:#3ddb72; }
+  .logo-arrow { color:#3ddb72; margin-right:2px; }
+  .logo-sub { display:block; font-size:7px; letter-spacing:2px; color:rgba(255,255,255,0.45); text-transform:uppercase; margin-top:3px; }
+  .leaf { position:absolute; top:-8px; left:158px; width:72px; animation:leafFloat 3.5s ease-in-out infinite; transform-origin:50% 95%; filter:drop-shadow(0 3px 10px rgba(0,200,100,0.5)); z-index:31; }
+  @keyframes leafFloat { 0%,100%{transform:rotate(-6deg) translateY(0);} 50%{transform:rotate(7deg) translateY(-7px);} }
+  .nav-links { display:flex; gap:32px; list-style:none; padding-top:3px; }
+  .nav-links a { text-decoration:none; font-size:10px; letter-spacing:2px; font-weight:600; text-transform:uppercase; color:rgba(255, 255, 255, 0.6); transition:color .2s; }
+  .nav-links a.active { color:#fff; border-bottom:2px solid #fff; padding-bottom:2px; }
+  .nav-links a:hover { color:#fff; }
+  .slide-content { position:absolute; inset:0; z-index:10; }
+  .eyebrow { position:absolute; left:24px; top:calc(50% - 200px); font-size:10px; letter-spacing:3.5px; font-weight:600; color: rgba(255, 255, 255, 0.7); text-transform:uppercase; }
+  .title-line1 { position:absolute; left:10px; top:calc(50% - 193px); font-family:'Bebas Neue',sans-serif; font-size:clamp(88px,12.8vw,158px); line-height:1; color:transparent; -webkit-text-stroke:1.5px rgba(255, 255, 255, 0.16); letter-spacing:-2px; white-space:nowrap; }
+  .title-line3 { position:absolute; left:6px; top:calc(50% + 47px); font-family:'Bebas Neue',sans-serif; font-size:clamp(88px,12.8vw,158px); line-height:1; color:transparent; -webkit-text-stroke:1.5px rgba(255,255,255,0.13); letter-spacing:-2px; white-space:nowrap; }
+  .video-text-canvas { position:absolute; left:10px; top:calc(50% - 78px); z-index:16; pointer-events:none; }
+  .description-block { position:absolute; left:24px; bottom:65px; max-width:300px; opacity:0; transform:translateY(15px); transition:opacity 0.8s ease 0.5s,transform 0.8s ease 0.5s; }
+  .slide.active .description-block { opacity:1; transform:translateY(0); }
+  .desc-text { font-size:10.5px; line-height:1.9; color:rgba(255, 255, 255, 0.52); font-style:italic; margin-bottom:13px; }
+  .learn-more { font-size:9px; letter-spacing:2.5px; font-weight:700; text-transform:uppercase; color:#fff; text-decoration:none; border-bottom:1.5px solid rgba(255,255,255,0.5); padding-bottom:2px; display:inline-block; transition:color .2s,border-color .2s; }
+  .learn-more:hover { color:#3ddb72; border-color:#3ddb72; }
+  .side-nav { position:absolute; right:15px; top:50%; transform:translateY(-50%); z-index:30; display:flex; flex-direction:column; align-items:center; gap:9px; }
+  .sn-line { width:1px; height:52px; background:linear-gradient(to bottom,transparent,rgba(255, 255, 255, 0.3)); margin-bottom:3px; }
+  .sn-dot { width:8px; height:8px; border:1.5px solid rgba(255,255,255,0.45); transform:rotate(45deg); cursor:pointer; transition:all .25s; position:relative; }
+  .sn-dot.active { background:#dfe6a1; border-color:#fff; }
+  .sn-dot:hover { background:#3ddb72; border-color:#3ddb72; }
+  .sn-dot.active::after { content:''; position:absolute; inset:-5px; border:1px solid rgba(61,219,114,0.5); transform:rotate(45deg); }
+  .progress-bar { position:absolute; bottom:0; left:0; height:2px; background:linear-gradient(to right,#3ddb72,#1a9e5a); width:0%; z-index:30; transition:width 0.1s linear; }
+
+  /* ── GLASSMORPHISM NAV BAR ── */
+  .glass-nav {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 10px 16px;
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 60px;
+    box-shadow:
+      0 8px 32px rgba(0,0,0,0.35),
+      inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+
+  .gn-btn {
+    position: relative;
+    width: 56px; height: 56px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    color: rgba(255,255,255,0.55);
+    transition: color .25s, background .25s;
+    flex-shrink: 0;
+  }
+
+  .gn-btn svg { width: 26px; height: 26px; stroke-width: 1.6; }
+
+  .gn-btn:hover { color: rgba(255,255,255,0.95); background: rgba(255,255,255,0.08); }
+
+  /* Botón activo (HOME / slide actual) */
+  .gn-btn.gn-active {
+    background: rgba(255,255,255,0.13);
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+  }
+
+  .gn-btn.gn-active svg { stroke-width: 2; }
+
+  /* Separador vertical entre iconos */
+  .gn-sep {
+    width: 1px; height: 22px;
+    background: rgba(255,255,255,0.1);
+    margin: 0 2px;
+    flex-shrink: 0;
+  }
+
+  /* Flechas dentro de la barra */
+  .gn-arrow {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50%;
+    color: rgba(255,255,255,0.7);
+    font-size: 16px;
+  }
+  .gn-arrow:hover { background: rgba(61,219,114,0.25); color: #3ddb72; border-color: rgba(61,219,114,0.4); }
+
+  .slide-counter { position:absolute; bottom:25px; left:24px; z-index:30; font-family:'Bebas Neue',sans-serif; font-size:12px; letter-spacing:2px; color:rgba(255,255,255,0.35); }
+  .slide-counter .current { color:#fff; font-size:16px; }
+
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px 12px;
+  background: rgba(2,13,10,0.85);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.logo { position: relative; line-height: 1.05; }
+.logo-line { display: block; font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: 3px; color: #fff; }
+.logo-line .g { color: var(--green); }
+.logo-arrow   { color: var(--green); margin-right: 2px; }
+.logo-sub     { display: block; font-size: 7px; letter-spacing: 2px; color: rgba(255,255,255,0.38); text-transform: uppercase; margin-top: 3px; }
+.leaf {
+  position: absolute; top: -8px; left: 150px; width: 58px;
+  animation: leafFloat 3.5s ease-in-out infinite;
+  transform-origin: 50% 95%;
+  filter: drop-shadow(0 3px 10px rgba(0,200,100,0.45));
+}
+@keyframes leafFloat {
+  0%,100% { transform: rotate(-6deg) translateY(0); }
+  50%      { transform: rotate(7deg) translateY(-7px); }
+}
+.nav-links { display: flex; gap: 28px; list-style: none; }
+.nav-links a {
+  text-decoration: none; font-size: 9.5px; letter-spacing: 2px;
+  font-weight: 600; text-transform: uppercase;
+  color: rgba(255,255,255,0.52); transition: color .2s;
+}
+.nav-links a.active { color: var(--green); }
+.nav-links a:hover  { color: #fff; }
+/* ==========================
+   TABLET
+========================== */
+@media (max-width: 1024px){
+
+  .title-line1,
+  .title-line3{
+    font-size: clamp(60px, 10vw, 100px);
+  }
+
+  .video-text-canvas{
+    transform: scale(.8);
+    transform-origin:left center;
+  }
+
+  .divider{
+    display:none;
+  }
+
+  .left-overlay,
+  .left-blur{
+    width:100%;
+  }
+
+  .description-block{
+    max-width:400px;
+  }
+
+  .nav-links{
+    gap:15px;
+  }
+}
+
+/* ==========================
+   CELULARES
+========================== */
+@media (max-width: 768px){
+
+  html,body{
+    overflow-x:hidden;
+  }
+
+  nav{
+    padding:12px;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .logo{
+    transform:scale(.9);
+  }
+
+  .leaf{
+    display:none;
+  }
+
+  .nav-links{
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+  }
+
+  .nav-links a{
+    font-size:8px;
+  }
+
+  .eyebrow{
+    top:120px;
+    left:15px;
+    font-size:8px;
+  }
+
+.title-line1{
+    left:10px;
+    top:150px;
+    font-size:55px;
+}
+
+.video-text-canvas{
+    left:10px;
+    top:195px;
+    transform:scale(.42);
+    transform-origin:left top;
+}
+
+.title-line3{
+    left:10px;
+    top:250px !important;
+    font-size:55px;
+}
+
+.description-block{
+    left:15px;
+    right:15px;
+    top:300px;
+    bottom:auto;
+    max-width:90%;
+}
+
+  .desc-text{
+    font-size:12px;
+    line-height:1.6;
+  }
+
+  .side-nav{
+    right:8px;
+  }
+
+  .glass-nav{
+    width:95%;
+    bottom:15px;
+    padding:8px;
+  }
+
+  .gn-btn{
+    width:45px;
+    height:45px;
+  }
+
+  .gn-btn svg{
+    width:20px;
+    height:20px;
+  }
+
+  .slide-counter{
+    top:85px;
+    left:15px;
+    bottom:auto;
+  }
+
+  .divider{
+    display:none;
+  }
+
+  .left-overlay{
+    width:100%;
+    background:rgba(0,0,0,.55);
+  }
+
+  .left-blur{
+    width:100%;
+  }
+}
+
+/* ==========================
+   CELULARES MUY PEQUEÑOS
+========================== */
+@media (max-width: 480px){
+
+  .title-line1{
+    font-size:38px;
+  }
+
+  .title-line3{
+    font-size:38px;
+  }
+
+  .video-text-canvas{
+    transform:scale(.45);
+  }
+
+  .desc-text{
+    font-size:11px;
+  }
+
+  .glass-nav{
+    transform:translateX(-50%) scale(.9);
+  }
+
+  .side-nav{
+    display:none;
+  }
+}
+
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="slides-container" id="slidesContainer">
+
+    <!-- SLIDE 1 -->
+    <div class="slide active" id="slide-0">
+      <video class="bg-video" id="bgVideo0" autoplay muted loop playsinline>
+        <source src="/fondos/3161306-hd_1920_1080_24fps.mp4" type="video/mp4">
+      </video>
+      <div class="left-blur"></div>
+      <div class="left-overlay"></div>
+      <div class="right-overlay"></div>
+      <div class="divider"></div>
+      <div class="slide-content">
+        <p class="eyebrow">Atención de excelencia</p>
+        <div class="title-line1">HOSPI</div>
+        <canvas class="video-text-canvas" id="canvas-0"></canvas>
+        <div class="title-line3">BIENEST</div>
+        <div class="description-block">
+          <p class="desc-text">Existe un momento en la vida de cada persona en que la salud lo es todo. Confía en los mejores especialistas. Ese momento es ahora.</p>
+          <a class="learn-more" href="/index.html">CONOCE MÁS</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide" id="slide-1">
+      <video class="bg-video" id="bgVideo1" autoplay muted loop playsinline>
+        <source src="/fondos/15495211_3840_2160_60fps.mp4" type="video/mp4">
+      </video>
+      <div class="left-blur"></div>
+      <div class="left-overlay" style="background:linear-gradient(to right,rgba(4,10,20,0.93) 0%,rgba(4,10,20,0.88) 50%,rgba(4,10,20,0.35) 80%,transparent 100%)"></div>
+      <div class="right-overlay"></div>
+      <div class="divider"></div>
+      <div class="slide-content">
+        <p class="eyebrow" style="color:rgba(61,181,219,0.85)">Especialistas certificados</p>
+        <div class="title-line1">MEDI</div>
+        <canvas class="video-text-canvas" id="canvas-1"></canvas>
+        <div class="title-line3" style="top:calc(50% + 47px)">EXPERTOS</div>
+        <div class="description-block">
+          <p class="desc-text">Nuestro equipo médico cuenta con más de 200 especialistas altamente calificados, listos para brindarte la atención que mereces.</p>
+          <a class="learn-more" href="/about.html" style="border-bottom-color:rgba(61,181,219,0.5)">VER ESPECIALISTAS</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide" id="slide-2">
+      <video class="bg-video" id="bgVideo2" autoplay muted loop playsinline>
+        <source src="/fondos/1494268-hd_1920_1080_24fps.mp4" type="video/mp4">
+      </video>
+      <div class="left-blur"></div>
+      <div class="left-overlay" style="background:linear-gradient(to right,rgba(20,14,4,0.93) 0%,rgba(20,14,4,0.88) 50%,rgba(20,14,4,0.35) 80%,transparent 100%)"></div>
+      <div class="right-overlay"></div>
+      <div class="divider"></div>
+      <div class="slide-content">
+        <p class="eyebrow" style="color:rgba(219,182,61,0.85)">Tecnología de vanguardia</p>
+        <div class="title-line1">TECNO</div>
+        <canvas class="video-text-canvas" id="canvas-2"></canvas>
+        <div class="title-line3" style="top:calc(50% + 47px)">AVANZADA</div>
+        <div class="description-block">
+          <p class="desc-text">Equipos de diagnóstico de última generación y quirófanos de alta complejidad para ofrecerte tratamientos con resultados superiores.</p>
+          <a class="learn-more" href="/about.html" style="border-bottom-color:rgba(219,182,61,0.5)">NUESTRA TECNOLOGÍA</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide" id="slide-3">
+      <video class="bg-video" id="bgVideo3" autoplay muted loop playsinline>
+        <source src="/fondos/12934697_3840_2160_30fps.mp4" type="video/mp4">
+      </video>
+      <div class="left-blur"></div>
+      <div class="left-overlay" style="background:linear-gradient(to right,rgba(20,4,10,0.93) 0%,rgba(20,4,10,0.88) 50%,rgba(20,4,10,0.35) 80%,transparent 100%)"></div>
+      <div class="right-overlay"></div>
+      <div class="divider"></div>
+      <div class="slide-content">
+        <p class="eyebrow" style="color:rgba(218, 127, 203, 0.85)">Cuidado integral</p>
+        <div class="title-line1">BIEN</div>
+        <canvas class="video-text-canvas" id="canvas-3"></canvas>
+        <div class="title-line3" style="top:calc(50% + 47px)">INTEGRAL</div>
+        <div class="description-block">
+          <p class="desc-text">Programas de bienestar completos que combinan medicina preventiva, rehabilitación y seguimiento personalizado para tu calidad de vida.</p>
+          <a class="learn-more" href="/about.html" style="border-bottom-color:rgba(204, 61, 209, 0.5)">CONOCE LOS PROGRAMAS</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NAVBAR -->
+  <nav>
+    <div class="logo">
+      <span class="logo-line">HOSPI<span class="g">TAL</span></span>
+      <span class="logo-line"><span class="logo-arrow">&#8592;</span>BIENE<span class="g">STAR</span></span>
+      <span class="logo-sub">Tu salud &middot; Prime &middot; Tu vida</span>
+      <svg class="leaf" viewBox="0 0 72 92" fill="none">
+        <path d="M36 4 C55 4,68 22,66 44 C64 64,52 82,36 88 C20 82,8 64,6 44 C4 22,17 4,36 4Z" fill="#2ecc71" opacity=".92"/>
+        <path d="M36 88 C32 65,30 38,36 4" stroke="#1a6b35" stroke-width="2" fill="none"/>
+        <path d="M36 72 C46 60,58 54,66 46" stroke="#1a6b35" stroke-width="1.3" fill="none"/>
+        <path d="M36 55 C48 44,60 38,66 30" stroke="#1a6b35" stroke-width="1.3" fill="none"/>
+        <path d="M36 39 C47 30,57 22,63 14" stroke="#1a6b35" stroke-width="1.3" fill="none"/>
+        <path d="M36 72 C26 60,14 54,6 46" stroke="#1a6b35" stroke-width="1.1" fill="none"/>
+        <path d="M26 16 C14 8,4 18,10 30 C16 40,28 40,36 30 C30 20,26 16,26 16Z" fill="#27ae60" opacity=".85"/>
+        <path d="M26 16 C26 24,30 30,36 30" stroke="#1a6b35" stroke-width="1.2" fill="none"/>
+      </svg>
+    </div>
+    <ul class="nav-links">
+    <li><a href="/inicio.html">Inicio</a></li>
+    <li><a href="/about.html">Nosotros</a></li>
+    <li><a href="/servicios.html">Servicios</a></li>
+    <li><a href="/programas.html" >Programas</a></li>
+    <li><a href="/citas.html">Citas</a></li>
+    <li><a href="/login.html">Acceso al Sistema</a></li>
+  </ul>
+  </nav>
+
+  <div class="side-nav" id="sideNav">
+    <div class="sn-line"></div>
+    <div class="sn-dot active" data-index="0"></div>
+    <div class="sn-dot" data-index="1"></div>
+    <div class="sn-dot" data-index="2"></div>
+    <div class="sn-dot" data-index="3"></div>
+  </div>
+
+  <!-- GLASS NAV BAR -->
+  <div class="glass-nav" id="glassNav">
+    <button class="gn-btn gn-arrow" id="prevBtn" title="Anterior">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="gn-sep"></div>
+    <!-- Home -->
+    <button class="gn-btn gn-active" onclick="location.href='/index.html'" title="Home">
+      <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    </button>
+    <!-- Citas -->
+    <button class="gn-btn" onclick="location.href='/citas.html'" title="Citas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="8" cy="14" r="0.8" fill="currentColor"/><circle cx="12" cy="14" r="0.8" fill="currentColor"/><circle cx="16" cy="14" r="0.8" fill="currentColor"/><circle cx="8" cy="18" r="0.8" fill="currentColor"/><circle cx="12" cy="18" r="0.8" fill="currentColor"/><circle cx="16" cy="18" r="0.8" fill="currentColor"/></svg>
+    </button>
+    <!-- Programas -->
+    <button class="gn-btn" onclick="location.href='/programas.html'" title="Programas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><polyline points="15 5 18 12 15 19"/><polyline points="9 5 6 12 9 19"/></svg>
+    </button>
+    <!-- FAQ -->
+    <button class="gn-btn" onclick="location.href='/faq.html'" title="FAQ">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-linecap="round" stroke-width="2.5"/></svg>
+    </button>
+    <div class="gn-sep"></div>
+    <button class="gn-btn gn-arrow" id="nextBtn" title="Siguiente">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+
+  <div class="slide-counter">
+    <span class="current" id="counterCurrent">01</span>
+    <span> / 04</span>
+  </div>
+
+  <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   CONFIG POR SLIDE:
+   coloredWord → la parte que muestra el video adentro (como "TAL" en slide 1)
+   restWord    → la parte blanca que sigue ("PRIME", etc.)
+   glowColor   → color del brillo en la parte blanca
+═══════════════════════════════════════════════════════════ */
+const SLIDE_CONFIG = [
+  { coloredWord: 'TAL',  restWord: ' PRIME',     glowColor: 'rgba(61,219,114,0.4)'  },
+  { coloredWord: 'CIN',  restWord: 'A PRIME',    glowColor: 'rgba(61,181,219,0.4)'  },
+  { coloredWord: 'LO',   restWord: 'GÍA PRIME',  glowColor: 'rgba(219,182,61,0.4)'  },
+  { coloredWord: 'ES',   restWord: 'TAR PRIME',  glowColor: 'rgba(219,61,110,0.4)'  },
+];
+
+const FONT_SIZE_VW = 12.8, MIN_FS = 88, MAX_FS = 158;
+function getFontSize() {
+  return Math.min(MAX_FS, Math.max(MIN_FS, window.innerWidth * FONT_SIZE_VW / 100));
+}
+
+/* Inicializar referencias */
+const slides_data = SLIDE_CONFIG.map((cfg, i) => ({
+  cfg,
+  canvas : document.getElementById(`canvas-${i}`),
+  ctx    : document.getElementById(`canvas-${i}`).getContext('2d'),
+  video  : document.getElementById(`bgVideo${i}`),
+}));
+
+function resizeAll() {
+  slides_data.forEach(({ cfg, canvas, ctx }) => {
+    const fs = getFontSize();
+    ctx.font = `normal 900 ${fs}px 'Bebas Neue', sans-serif`;
+    const totalWidth = ctx.measureText(cfg.coloredWord + cfg.restWord).width + 20;
+    canvas.width  = Math.min(totalWidth, window.innerWidth - 10);
+    canvas.height = fs * 1.08;
+  });
+}
+
+function drawAll() {
+  slides_data.forEach(({ cfg, canvas, ctx, video }) => {
+    const fs = getFontSize();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = `normal 900 ${fs}px 'Bebas Neue', sans-serif`;
+
+    const coloredWidth = ctx.measureText(cfg.coloredWord).width;
+
+    /* ── PARTE 1: palabra con video adentro (idéntico al slide 1 original) ── */
+    // Paso A: pintar las letras en blanco sólido
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#fff';
+    ctx.fillText(cfg.coloredWord, 0, fs * 0.95);
+
+    // Paso B: recortar el video al contorno de las letras
+    ctx.globalCompositeOperation = 'source-in';
+    if (video.readyState >= 2) {
+      const scaleX = window.innerWidth  / video.videoWidth;
+      const scaleY = window.innerHeight / video.videoHeight;
+      const scale  = Math.max(scaleX, scaleY);
+      const vw = video.videoWidth  * scale;
+      const vh = video.videoHeight * scale;
+      const ox = (window.innerWidth  - vw) / 2;
+      const oy = (window.innerHeight - vh) / 2;
+      const rect = canvas.getBoundingClientRect();
+      ctx.drawImage(
+        video,
+        0, 0, video.videoWidth, video.videoHeight,
+        ox - rect.left, oy - rect.top, vw, vh
+      );
+    } else {
+      /* fallback verde/azul mientras carga */
+      ctx.fillStyle = cfg.glowColor.replace('0.4', '1');
+      ctx.fillRect(0, 0, coloredWidth, canvas.height);
+    }
+
+    /* ── PARTE 2: texto blanco con glow para el resto ── */
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle   = '#ffffff';
+    ctx.shadowColor = cfg.glowColor;
+    ctx.shadowBlur  = 30;
+    ctx.fillText(cfg.restWord, coloredWidth, fs * 0.95);
+    ctx.shadowBlur = 0;
+  });
+
+  requestAnimationFrame(drawAll);
+}
+
+document.fonts.ready.then(() => { resizeAll(); drawAll(); });
+window.addEventListener('resize', resizeAll);
+
+/* ══════════════════════════════════════
+   SLIDESHOW
+══════════════════════════════════════ */
+const TOTAL_SLIDES  = 4;
+const AUTO_INTERVAL = 10000;
+let currentSlide = 0;
+let progressTimer = null;
+
+const slides      = document.querySelectorAll('.slide');
+const dots        = document.querySelectorAll('.sn-dot');
+const progressBar = document.getElementById('progressBar');
+const counterEl   = document.getElementById('counterCurrent');
+
+function goToSlide(index) {
+  slides[currentSlide].classList.remove('active');
+  dots[currentSlide].classList.remove('active');
+  currentSlide = (index + TOTAL_SLIDES) % TOTAL_SLIDES;
+  slides[currentSlide].classList.add('active');
+  dots[currentSlide].classList.add('active');
+  counterEl.textContent = String(currentSlide + 1).padStart(2, '0');
+  resetProgress();
+}
+
+function resetProgress() {
+  progressBar.style.transition = 'none';
+  progressBar.style.width = '0%';
+  clearTimeout(progressTimer);
+  progressBar.offsetWidth;
+  progressBar.style.transition = `width ${AUTO_INTERVAL}ms linear`;
+  progressBar.style.width = '100%';
+  progressTimer = setTimeout(() => goToSlide(currentSlide + 1), AUTO_INTERVAL);
+}
+
+dots.forEach((dot, i) => dot.addEventListener('click', () => goToSlide(i)));
+document.getElementById('prevBtn').addEventListener('click', () => goToSlide(currentSlide - 1));
+document.getElementById('nextBtn').addEventListener('click', () => goToSlide(currentSlide + 1));
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goToSlide(currentSlide + 1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goToSlide(currentSlide - 1);
+});
+
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive:true });
+document.addEventListener('touchend',   e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 50) goToSlide(currentSlide + (dx < 0 ? 1 : -1));
+});
+
+resetProgress();
+
+</script>
+</body>
+</html>

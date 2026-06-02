@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Panel Limpieza — Hospital Bienestar Prime</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#3ddb72;--green-mid:#27ae60;--green-dk:#0f5c2e;
+  --bg:#020d0a;--bg2:#040f0b;--sidebar:#030e08;
+  --glass:rgba(255,255,255,0.04);--glass-h:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.07);--border-g:rgba(61,219,114,0.25);
+  --text:rgba(255,255,255,0.88);--text-dim:rgba(255,255,255,0.42);
+  --sidebar-w:240px;--topbar-h:60px;
+  --yellow:#f0c040;--red:#e05555;--blue:#4ab4e8;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;-webkit-tap-highlight-color:transparent}
+::selection{background:rgba(61,219,114,0.25)}
+button,input,select,textarea{font-family:inherit}
+
+/* ── TOPBAR ── */
+.topbar{height:var(--topbar-h);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px 0 0;background:var(--sidebar);border-bottom:1px solid var(--border);z-index:60;position:relative}
+.topbar-left{width:var(--sidebar-w);flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid var(--border);height:100%}
+.tb-logo{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#fff}
+.tb-logo span{color:var(--green)}
+.tb-logo-sub{font-size:6.5px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase}
+.topbar-right{display:flex;align-items:center;gap:16px;flex:1;justify-content:flex-end}
+.user-pill{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:6px 12px 6px 6px}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:rgba(240,192,64,0.15);border:1.5px solid rgba(240,192,64,0.35);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--yellow)}
+.user-name{font-size:10px;font-weight:700;color:#fff}
+.user-role{font-size:7.5px;letter-spacing:1px;text-transform:uppercase;color:var(--yellow)}
+.sidebar-toggle{display:none;width:36px;height:36px;border-radius:8px;background:var(--glass);border:1px solid var(--border);color:var(--text-dim);cursor:pointer;margin-left:12px;flex-direction:column;justify-content:center;align-items:center;gap:4px}
+.sidebar-toggle span{display:block;width:16px;height:1.5px;background:rgba(255,255,255,0.7)}
+
+/* ── LAYOUT ── */
+.app-body{flex:1;display:flex;overflow:hidden}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;transition:transform .3s ease;z-index:50;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.06) transparent}
+.nav-group{padding:20px 0 8px}
+.nav-group-label{font-size:7px;letter-spacing:2.5px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,0.2);padding:0 20px 10px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 20px;cursor:pointer;font-size:10px;font-weight:600;color:rgba(255,255,255,0.45);border-left:2px solid transparent;transition:all .2s;position:relative}
+.nav-item:hover{color:rgba(255,255,255,0.85);background:var(--glass)}
+.nav-item.active{color:var(--green);border-left-color:var(--green);background:rgba(61,219,114,0.06)}
+.nav-item svg{width:16px;height:16px;stroke-width:1.8;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--yellow);color:#020d0a;font-size:7px;font-weight:700;padding:2px 7px;border-radius:10px}
+.sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border)}
+.logout-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;background:none;border:1px solid var(--border);color:var(--text-dim);cursor:pointer;font-size:10px;font-weight:600;transition:all .2s}
+.logout-btn:hover{background:rgba(219,61,61,0.1);border-color:rgba(219,61,61,0.3);color:#db3d3d}
+.logout-btn svg{width:15px;height:15px;stroke-width:1.8}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;background:var(--bg);scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.06) transparent}
+.panel{display:none;padding:28px 36px 60px}
+.panel.active{display:block}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,3.5vw,44px);line-height:.95;color:#fff}
+.page-title span{color:var(--green)}
+.page-sub{font-size:10.5px;color:var(--text-dim);margin-top:6px}
+.page-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:5px;border:none;cursor:pointer;font-size:8.5px;letter-spacing:2px;font-weight:700;text-transform:uppercase;transition:all .2s}
+.btn-green{background:var(--green);color:#020d0a;box-shadow:0 0 20px rgba(61,219,114,0.2)}
+.btn-green:hover{background:#5df08d;transform:translateY(-1px)}
+.btn-ghost{background:var(--glass);border:1px solid var(--border);color:rgba(255,255,255,0.65)}
+.btn-ghost:hover{background:var(--glass-h);color:#fff}
+.btn-yellow{background:rgba(240,192,64,0.15);border:1px solid rgba(240,192,64,0.3);color:var(--yellow)}
+.btn-yellow:hover{background:rgba(240,192,64,0.25);transform:translateY(-1px)}
+.btn svg{width:14px;height:14px;stroke-width:2}
+
+/* ── METRICS ── */
+.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.metric-card{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:22px 20px;position:relative;overflow:hidden;transition:border-color .25s,transform .2s;cursor:default}
+.metric-card:hover{border-color:var(--border-g);transform:translateY(-2px)}
+.metric-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--green);opacity:0;transition:opacity .3s}
+.metric-card:hover::after{opacity:1}
+.metric-card.yellow::after{background:var(--yellow)}
+.metric-card.red::after{background:var(--red)}
+.metric-num{font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1;color:var(--green);display:block}
+.metric-num.yellow{color:var(--yellow)}
+.metric-num.red{color:var(--red)}
+.metric-label{font-size:8px;letter-spacing:2px;font-weight:600;text-transform:uppercase;color:var(--text-dim);margin-top:4px}
+
+/* ── HABITACIONES GRID ── */
+.hab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:28px}
+.hab-card{background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:20px;position:relative;overflow:hidden;transition:border-color .25s,transform .2s;cursor:pointer}
+.hab-card:hover{transform:translateY(-2px)}
+.hab-card.limpia{border-color:rgba(61,219,114,0.3)}
+.hab-card.sucia{border-color:rgba(224,85,85,0.3)}
+.hab-card.en-proceso{border-color:rgba(240,192,64,0.3)}
+.hab-card.mantenimiento{border-color:rgba(74,180,232,0.3)}
+.hab-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.hab-card.limpia::before{background:var(--green)}
+.hab-card.sucia::before{background:var(--red)}
+.hab-card.en-proceso::before{background:var(--yellow)}
+.hab-card.mantenimiento::before{background:var(--blue)}
+.hab-num{font-family:'Bebas Neue',sans-serif;font-size:32px;line-height:1;color:#fff;margin-bottom:4px}
+.hab-piso{font-size:8px;letter-spacing:2px;font-weight:700;text-transform:uppercase;color:var(--text-dim);margin-bottom:14px}
+.hab-estado{display:inline-flex;align-items:center;gap:6px;font-size:8.5px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:14px}
+.hab-estado.limpia{background:rgba(61,219,114,0.12);color:var(--green);border:1px solid rgba(61,219,114,0.25)}
+.hab-estado.sucia{background:rgba(224,85,85,0.12);color:#e05555;border:1px solid rgba(224,85,85,0.25)}
+.hab-estado.en-proceso{background:rgba(240,192,64,0.12);color:var(--yellow);border:1px solid rgba(240,192,64,0.25)}
+.hab-estado.mantenimiento{background:rgba(74,180,232,0.12);color:var(--blue);border:1px solid rgba(74,180,232,0.25)}
+.estado-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.estado-dot.limpia{background:var(--green)}
+.estado-dot.sucia{background:#e05555}
+.estado-dot.en-proceso{background:var(--yellow)}
+.estado-dot.mantenimiento{background:var(--blue)}
+.hab-meta{font-size:9px;color:var(--text-dim);margin-bottom:4px}
+.hab-actions{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+.hab-btn{flex:1;min-width:fit-content;padding:8px 10px;border-radius:5px;border:1px solid var(--border);background:var(--glass);color:rgba(255,255,255,0.5);font-size:7.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .18s;white-space:nowrap}
+.hab-btn:hover{background:var(--glass-h);color:#fff}
+.hab-btn.primary{background:rgba(61,219,114,0.12);border-color:rgba(61,219,114,0.25);color:var(--green)}
+.hab-btn.primary:hover{background:rgba(61,219,114,0.22)}
+
+/* ── TABLA BASE ── */
+.table-card{background:var(--glass);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:20px}
+.table-card-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.table-card-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.5px;color:#fff}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead th{text-align:left;padding:11px 16px;font-size:7.5px;letter-spacing:2px;font-weight:700;text-transform:uppercase;color:var(--text-dim);border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr{border-bottom:1px solid rgba(255,255,255,0.03);transition:background .15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--glass)}
+tbody td{padding:12px 16px;color:rgba(255,255,255,0.72);vertical-align:middle}
+tbody td:first-child{font-weight:600;color:#fff}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:7.5px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase}
+.badge-green{background:rgba(61,219,114,0.12);color:var(--green);border:1px solid rgba(61,219,114,0.25)}
+.badge-yellow{background:rgba(240,192,64,0.12);color:var(--yellow);border:1px solid rgba(240,192,64,0.25)}
+.badge-red{background:rgba(224,85,85,0.12);color:#e05555;border:1px solid rgba(224,85,85,0.25)}
+.badge-blue{background:rgba(74,180,232,0.12);color:var(--blue);border:1px solid rgba(74,180,232,0.25)}
+.row-actions{display:flex;gap:5px}
+.row-btn{width:28px;height:28px;border-radius:5px;background:var(--glass);border:1px solid var(--border);color:rgba(255,255,255,0.45);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s}
+.row-btn:hover{background:var(--glass-h);color:#fff;border-color:rgba(255,255,255,0.18)}
+.row-btn.success:hover{background:rgba(61,219,114,.12);color:var(--green);border-color:var(--border-g)}
+.row-btn.danger:hover{background:rgba(219,61,61,.12);color:#e05252;border-color:rgba(219,61,61,.3)}
+.row-btn svg{width:12px;height:12px;stroke-width:2}
+
+/* ── CHECKLIST ── */
+.checklist-section{background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:16px}
+.checklist-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.5px;color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.checklist-title .progress-txt{font-family:'Montserrat',sans-serif;font-size:9px;color:var(--text-dim);font-weight:600;margin-left:auto}
+.progress-bar-wrap{height:4px;background:var(--border);border-radius:2px;margin-bottom:16px;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--green);border-radius:2px;transition:width .4s ease}
+.check-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:opacity .2s}
+.check-item:last-child{border-bottom:none}
+.check-item.done{opacity:.5}
+.check-box{width:20px;height:20px;border-radius:4px;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.check-item.done .check-box{background:var(--green);border-color:var(--green)}
+.check-box svg{width:11px;height:11px;stroke:#020d0a;stroke-width:2.5;opacity:0;transition:opacity .2s}
+.check-item.done .check-box svg{opacity:1}
+.check-text{font-size:11px;color:var(--text)}
+.check-item.done .check-text{text-decoration:line-through;color:var(--text-dim)}
+.check-cat{font-size:7.5px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;color:var(--text-dim);margin-left:auto}
+
+/* ── REPORTE INCIDENCIA ── */
+.incident-card{background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:18px;margin-bottom:10px;transition:border-color .2s;position:relative}
+.incident-card:hover{border-color:var(--border-g)}
+.incident-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.incident-room{font-family:'Bebas Neue',sans-serif;font-size:16px;color:#fff}
+.incident-date{font-size:9px;color:var(--text-dim)}
+.incident-desc{font-size:11px;color:var(--text);margin-bottom:6px}
+.incident-type{font-size:9px;color:var(--text-dim)}
+.incident-urg{position:absolute;top:12px;right:12px}
+
+/* ── FILTROS ── */
+.filter-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+.filter-pill{padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:var(--glass);color:var(--text-dim);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.filter-pill:hover{background:var(--glass-h);color:#fff}
+.filter-pill.active{background:rgba(61,219,114,0.1);border-color:rgba(61,219,114,0.3);color:var(--green)}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:8px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,0.6);animation:modalIn .25s ease}
+@keyframes modalIn{from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)}}
+.modal-header{padding:22px 24px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.5px;color:#fff}
+.modal-close{width:30px;height:30px;border-radius:6px;background:var(--glass);border:1px solid var(--border);color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:16px}
+.modal-close:hover{background:var(--glass-h);color:#fff}
+.modal-body{padding:24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:7px}
+.form-group.full{grid-column:span 2}
+.form-label{font-size:7.5px;letter-spacing:2px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,0.45)}
+.form-input,.form-select,.form-textarea{background:var(--glass);border:1px solid var(--border);border-radius:5px;padding:11px 14px;font-size:11.5px;color:var(--text);outline:none;transition:border-color .2s;-webkit-appearance:none}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--border-g);background:rgba(61,219,114,0.03)}
+.form-select option{background:#040f0b}
+.form-textarea{resize:vertical;min-height:80px}
+
+/* ── TOAST ── */
+.toast-stack{position:fixed;bottom:24px;right:24px;z-index:300;display:flex;flex-direction:column;gap:10px}
+.toast-msg{display:flex;align-items:center;gap:12px;background:rgba(4,15,11,0.97);border:1px solid var(--border-g);border-radius:6px;padding:14px 18px;font-size:11px;color:rgba(255,255,255,0.85);box-shadow:0 8px 32px rgba(0,0,0,0.4);animation:toastIn .3s ease;transition:opacity .3s}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)}}
+.toast-err{border-color:rgba(224,85,85,0.4)}
+.toast-msg .t-icon{width:16px;height:16px;flex-shrink:0}
+
+/* ── TURNO BANNER ── */
+.turno-banner{display:flex;align-items:center;justify-content:space-between;background:rgba(61,219,114,0.06);border:1px solid rgba(61,219,114,0.18);border-radius:8px;padding:16px 20px;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.turno-info{display:flex;align-items:center;gap:14px}
+.turno-dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 8px rgba(61,219,114,0.6);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.turno-label{font-size:8.5px;letter-spacing:2px;font-weight:700;text-transform:uppercase;color:var(--green)}
+.turno-hora{font-size:11px;color:var(--text-dim)}
+.turno-prog{display:flex;align-items:center;gap:10px}
+.turno-prog-label{font-size:9px;color:var(--text-dim)}
+.turno-prog-num{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--green)}
+
+/* ── RESPONSIVE ── */
+/* ── TABLET ── */
+@media(max-width:1100px){
+  .metrics-row{grid-template-columns:repeat(2,1fr)}
+  .hab-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+  thead th{padding:9px 12px}
+  tbody td{padding:10px 12px}
+}
+
+/* ── MOBILE / TABLET ── */
+@media(max-width:768px){
+  :root{--topbar-h:56px}
+
+  .sidebar{
+    position:fixed;top:var(--topbar-h);left:0;bottom:0;
+    transform:translateX(-100%);width:260px;
+    box-shadow:4px 0 24px rgba(0,0,0,0.5);z-index:100;
+  }
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay{
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,0.5);z-index:99;
+  }
+  .sidebar-overlay.show{display:block}
+
+  .sidebar-toggle{display:flex}
+  .topbar-left{width:auto;border-right:none;padding:0 14px}
+  .topbar{padding:0 14px 0 0}
+
+  .panel{padding:16px 14px 80px}
+
+  .metrics-row{grid-template-columns:1fr 1fr;gap:10px}
+  .metric-card{padding:16px 14px}
+  .metric-num{font-size:30px}
+
+  /* Hab grid: 2 columnas en móvil */
+  .hab-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .hab-card{padding:14px}
+  .hab-num{font-size:24px}
+  .hab-actions{flex-direction:column;gap:5px}
+  .hab-btn{width:100%;text-align:center}
+
+  /* Checklist */
+  .checklist-section{padding:14px}
+  .check-item{padding:8px 0}
+  .check-cat{display:none}
+
+  /* Incidencias */
+  .incident-card{padding:14px}
+
+  /* Turno banner */
+  .turno-banner{flex-direction:column;align-items:flex-start;gap:8px}
+  .turno-prog{flex-direction:row;align-items:center;gap:10px}
+
+  .form-grid{grid-template-columns:1fr}
+  .form-group.full{grid-column:span 1}
+
+  .page-header{flex-direction:column;align-items:flex-start;gap:12px;margin-bottom:18px}
+  .page-actions{width:100%;flex-wrap:wrap}
+  .page-actions .btn{flex:1;justify-content:center}
+
+  .filter-row{gap:6px}
+  .filter-pill{padding:6px 10px;font-size:8px}
+
+  .table-wrap{-webkit-overflow-scrolling:touch}
+  table{min-width:500px}
+  .table-card-header{padding:14px;flex-direction:column;align-items:flex-start;gap:8px}
+
+  .modal{max-width:100% !important;border-radius:14px 14px 0 0;position:fixed;bottom:0;left:0;right:0;max-height:92vh}
+  .modal-overlay{align-items:flex-end;padding:0}
+
+  .user-pill{padding:5px 10px 5px 5px}
+  .user-name{font-size:9px}
+  .btn{padding:10px 14px;font-size:8px;letter-spacing:1.5px}
+}
+
+/* ── MOBILE PEQUEÑO ── */
+@media(max-width:420px){
+  .metrics-row{grid-template-columns:1fr 1fr;gap:8px}
+  .metric-num{font-size:26px}
+  .metric-label{font-size:7px}
+  .metric-card{padding:12px 10px}
+  .page-title{font-size:24px}
+  .panel{padding:12px 10px 80px}
+  .hab-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .hab-num{font-size:20px}
+  table{min-width:420px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div>
+      <div class="tb-logo">HOSPI<span>TAL</span></div>
+      <div class="tb-logo-sub">Dpto. Limpieza</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="user-pill">
+      <div class="user-avatar" id="userAvatar">L</div>
+      <div>
+        <div class="user-name" id="userName">Empleado</div>
+        <div class="user-role">Limpieza</div>
+      </div>
+    </div>
+    <button class="sidebar-toggle" id="sidebarToggle"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<!-- ── APP BODY ── -->
+<div class="app-body">
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="nav-group">
+      <div class="nav-group-label">Principal</div>
+      <div class="nav-item active" data-panel="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Habitaciones</div>
+      <div class="nav-item" data-panel="habitaciones">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Estado General
+        <span class="nav-badge" id="navBadgePendientes">0</span>
+      </div>
+      <div class="nav-item" data-panel="checklist">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Checklist de Limpieza
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Reportes</div>
+      <div class="nav-item" data-panel="incidencias">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Incidencias
+      </div>
+      <div class="nav-item" data-panel="historial">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="12 8 12 12 14 14"/><path d="M3.05 11a9 9 0 1 0 .5-4m-.5-4v4h4"/></svg>
+        Historial
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <button class="logout-btn" id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar Sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">BIENVENIDO, <span id="dashGreet">EMPLEADO</span></div>
+          <div class="page-sub" id="dashDate"></div>
+        </div>
+      </div>
+
+      <div class="turno-banner" id="turnoBanner">
+        <div class="turno-info">
+          <div class="turno-dot"></div>
+          <div>
+            <div class="turno-label">Turno activo</div>
+            <div class="turno-hora" id="turnoHora">—</div>
+          </div>
+        </div>
+        <div class="turno-prog">
+          <span class="turno-prog-label">Habitaciones completadas hoy</span>
+          <span class="turno-prog-num" id="dashCompletadas">0</span>
+        </div>
+      </div>
+
+      <div class="metrics-row" id="metricsRow"></div>
+
+      <div class="table-card">
+        <div class="table-card-header">
+          <span class="table-card-title">PENDIENTES URGENTES</span>
+          <button class="btn btn-green" onclick="navigate('habitaciones')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Ver todas
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Habitación</th><th>Piso</th><th>Estado</th><th>Última limpieza</th><th>Notas</th><th>Acción</th></tr></thead>
+            <tbody id="dashPendBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ HABITACIONES ══ -->
+    <div class="panel" id="panel-habitaciones">
+      <div class="page-header">
+        <div>
+          <div class="page-title">ESTADO DE <span>HABITACIONES</span></div>
+          <div class="page-sub">Actualiza el estado de limpieza de cada área.</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-ghost" id="btnAddHab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nueva habitación
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <div class="filter-pill active" data-filter="todas">Todas</div>
+        <div class="filter-pill" data-filter="sucia">Sucias</div>
+        <div class="filter-pill" data-filter="en-proceso">En proceso</div>
+        <div class="filter-pill" data-filter="limpia">Limpias</div>
+        <div class="filter-pill" data-filter="mantenimiento">Mantenimiento</div>
+      </div>
+
+      <div class="hab-grid" id="habGrid"></div>
+    </div>
+
+    <!-- ══ CHECKLIST ══ -->
+    <div class="panel" id="panel-checklist">
+      <div class="page-header">
+        <div>
+          <div class="page-title">CHECKLIST DE <span>LIMPIEZA</span></div>
+          <div class="page-sub">Marca cada tarea al completarla durante tu turno.</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-ghost" id="btnResetChecklist">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+            Reiniciar turno
+          </button>
+          <button class="btn btn-green" id="btnGuardarChecklist">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            Guardar progreso
+          </button>
+        </div>
+      </div>
+
+      <div id="checklistContainer"></div>
+    </div>
+
+    <!-- ══ INCIDENCIAS ══ -->
+    <div class="panel" id="panel-incidencias">
+      <div class="page-header">
+        <div>
+          <div class="page-title">REPORTE DE <span>INCIDENCIAS</span></div>
+          <div class="page-sub">Registra fallas, derrames o situaciones que requieren atención.</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-green" id="btnNewIncidencia">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nueva incidencia
+          </button>
+        </div>
+      </div>
+      <div id="incidenciasList"></div>
+    </div>
+
+    <!-- ══ HISTORIAL ══ -->
+    <div class="panel" id="panel-historial">
+      <div class="page-header">
+        <div>
+          <div class="page-title">HISTORIAL DE <span>ACTIVIDAD</span></div>
+          <div class="page-sub">Registro de limpiezas realizadas por tu cuenta.</div>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Habitación</th><th>Acción</th><th>Fecha y hora</th><th>Notas</th></tr></thead>
+            <tbody id="historialBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══ MODAL: CAMBIAR ESTADO HABITACIÓN ═══ -->
+<div class="modal-overlay" id="modalEstado">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalEstadoTitle">HAB. 000</div>
+      <button class="modal-close" onclick="closeModal('modalEstado')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Nuevo Estado</label>
+          <select class="form-select" id="nuevoEstado">
+            <option value="limpia">✅  Limpia</option>
+            <option value="en-proceso">🟡  En proceso</option>
+            <option value="sucia">🔴  Sucia</option>
+            <option value="mantenimiento">🔵  Mantenimiento</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Notas (opcional)</label>
+          <textarea class="form-textarea" id="estadoNotas" placeholder="Derrames, objetos olvidados, fallas…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalEstado')">Cancelar</button>
+      <button class="btn btn-green" id="saveEstadoBtn">Guardar cambio</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: NUEVA HABITACIÓN ═══ -->
+<div class="modal-overlay" id="modalAddHab">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">NUEVA HABITACIÓN</div>
+      <button class="modal-close" onclick="closeModal('modalAddHab')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Número</label>
+          <input class="form-input" type="text" id="habNumero" placeholder="101">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Piso</label>
+          <select class="form-select" id="habPiso">
+            <option value="Planta baja">Planta baja</option>
+            <option value="Piso 1">Piso 1</option>
+            <option value="Piso 2">Piso 2</option>
+            <option value="Piso 3">Piso 3</option>
+            <option value="Urgencias">Urgencias</option>
+            <option value="UCI">UCI</option>
+            <option value="Pediatría">Pediatría</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Tipo de área</label>
+          <select class="form-select" id="habTipo">
+            <option>Habitación paciente</option>
+            <option>Baño</option>
+            <option>Pasillo</option>
+            <option>Quirófano</option>
+            <option>Sala de espera</option>
+            <option>Consultorio</option>
+            <option>Almacén</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Notas iniciales</label>
+          <textarea class="form-textarea" id="habNotas" placeholder="Descripción, particularidades…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalAddHab')">Cancelar</button>
+      <button class="btn btn-green" id="saveHabBtn">Agregar habitación</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: NUEVA INCIDENCIA ═══ -->
+<div class="modal-overlay" id="modalIncidencia">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">REPORTAR INCIDENCIA</div>
+      <button class="modal-close" onclick="closeModal('modalIncidencia')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Área / Habitación</label>
+          <select class="form-select" id="incHabitacion"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipo de incidencia</label>
+          <select class="form-select" id="incTipo">
+            <option>Derrame de líquidos</option>
+            <option>Falla de equipo</option>
+            <option>Objeto cortante</option>
+            <option>Residuo biológico</option>
+            <option>Daño en instalaciones</option>
+            <option>Plagas / insectos</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Descripción detallada</label>
+          <textarea class="form-textarea" id="incDesc" placeholder="Describe lo que encontraste…"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Urgencia</label>
+          <select class="form-select" id="incUrgencia">
+            <option value="baja">🟢  Baja — Puede esperar</option>
+            <option value="media">🟡  Media — Hoy mismo</option>
+            <option value="alta">🔴  Alta — Inmediata</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado inicial</label>
+          <select class="form-select" id="incEstado">
+            <option value="abierta">Abierta</option>
+            <option value="en-proceso">En proceso</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalIncidencia')">Cancelar</button>
+      <button class="btn btn-green" id="saveIncidenciaBtn">Reportar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<!-- ═══════════════════════ FIREBASE LOGIC ═══════════════════════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc,
+  query, where, orderBy, serverTimestamp, limit
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FC = {
+  apiKey:"AIzaSyCtve3i6HRbmigXrRIXNa8A2KmNCItqurw",
+  authDomain:"hospital-bienestar.firebaseapp.com",
+  projectId:"hospital-bienestar",
+  storageBucket:"hospital-bienestar.firebasestorage.app",
+  messagingSenderId:"296686621012",
+  appId:"1:296686621012:web:2664e71671f69ec17278c1"
+};
+const app  = initializeApp(FC);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+let me = null;
+let habitacionesCache = [];
+let checkState = {};      // { itemId: true/false }
+let currentHabId = null;  // para modal de estado
+
+// ──────────────────────────────── HELPERS ─────────────────────────
+function toast(msg, isErr = false) {
+  const stack = document.getElementById('toastStack');
+  const el = document.createElement('div');
+  el.className = 'toast-msg' + (isErr ? ' toast-err' : '');
+  const iconColor = isErr ? '#e05252' : 'var(--green)';
+  const icon = isErr
+    ? `<svg class="t-icon" viewBox="0 0 24 24" fill="none" stroke="${iconColor}"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`
+    : `<svg class="t-icon" viewBox="0 0 24 24" fill="none" stroke="${iconColor}"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+  el.innerHTML = icon + msg;
+  stack.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3500);
+}
+
+window.closeModal = id => document.getElementById(id).classList.remove('open');
+
+function navigate(panelId) {
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.nav-item[data-panel="${panelId}"]`)?.classList.add('active');
+  document.getElementById('panel-' + panelId)?.classList.add('active');
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+window.navigate = navigate;
+
+document.querySelectorAll('.nav-item[data-panel]').forEach(i =>
+  i.addEventListener('click', () => navigate(i.dataset.panel))
+);
+document.getElementById('sidebarToggle').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+});
+document.getElementById('sidebarOverlay').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+});
+
+// Fecha
+const dias  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const now   = new Date();
+document.getElementById('dashDate').textContent =
+  `${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]} ${now.getFullYear()}`;
+
+// Turno (según hora del servidor local)
+function calcTurno() {
+  const h = now.getHours();
+  if (h >= 7 && h < 15) return { label:'Turno matutino', rango:'07:00 – 15:00' };
+  if (h >= 15 && h < 23) return { label:'Turno vespertino', rango:'15:00 – 23:00' };
+  return { label:'Turno nocturno', rango:'23:00 – 07:00' };
+}
+const turno = calcTurno();
+document.getElementById('turnoHora').textContent = `${turno.label} · ${turno.rango}`;
+
+// ──────────────────────────────── HABITACIONES ─────────────────────
+const ESTADOS_CONFIG = {
+  limpia:       { label:'Limpia',       badge:'badge-green',  class:'limpia' },
+  sucia:        { label:'Sucia',        badge:'badge-red',    class:'sucia' },
+  'en-proceso': { label:'En proceso',   badge:'badge-yellow', class:'en-proceso' },
+  mantenimiento:{ label:'Mantenimiento',badge:'badge-blue',   class:'mantenimiento' }
+};
+
+async function loadHabitaciones() {
+  const snap = await getDocs(query(collection(db,'habitaciones'), orderBy('numero','asc')));
+
+  // Si no hay datos aún, crea por defecto
+  if (snap.empty) { await initDefaultHabitaciones(); return loadHabitaciones(); }
+
+  habitacionesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  const sucias    = habitacionesCache.filter(h => h.estado === 'sucia' || h.estado === 'en-proceso').length;
+  const limpias   = habitacionesCache.filter(h => h.estado === 'limpia').length;
+  const mant      = habitacionesCache.filter(h => h.estado === 'mantenimiento').length;
+
+  // Badge sidebar
+  document.getElementById('navBadgePendientes').textContent = sucias;
+  document.getElementById('navBadgePendientes').style.display = sucias > 0 ? '' : 'none';
+
+  // Métricas dashboard
+  document.getElementById('metricsRow').innerHTML = `
+    <div class="metric-card"><span class="metric-num">${habitacionesCache.length}</span><div class="metric-label">Total áreas</div></div>
+    <div class="metric-card red"><span class="metric-num red">${sucias}</span><div class="metric-label">Pendientes</div></div>
+    <div class="metric-card"><span class="metric-num">${limpias}</span><div class="metric-label">Limpias</div></div>
+    <div class="metric-card yellow"><span class="metric-num yellow">${mant}</span><div class="metric-label">Mantenimiento</div></div>`;
+
+  // Completadas hoy (conteo de actividad)
+  const actSnap = await getDocs(query(
+    collection(db,'actividadLimpieza'),
+    where('empleadoId','==', me.uid),
+    where('fecha','>=', new Date(now.toDateString()))
+  ));
+  document.getElementById('dashCompletadas').textContent = actSnap.size;
+
+  renderHabGrid('todas');
+  renderDashPendientes();
+  poblarSelectHabitaciones();
+}
+
+function renderHabGrid(filtro) {
+  const lista = filtro === 'todas'
+    ? habitacionesCache
+    : habitacionesCache.filter(h => h.estado === filtro);
+
+  if (!lista.length) {
+    document.getElementById('habGrid').innerHTML =
+      `<p style="color:var(--text-dim);font-size:11px;padding:20px;grid-column:1/-1">No hay habitaciones con ese estado.</p>`;
+    return;
+  }
+
+  document.getElementById('habGrid').innerHTML = lista.map(h => {
+    const cfg = ESTADOS_CONFIG[h.estado] || ESTADOS_CONFIG.limpia;
+    const ultima = h.ultimaLimpieza?.toDate
+      ? h.ultimaLimpieza.toDate().toLocaleString('es-MX',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'})
+      : '—';
+    return `
+      <div class="hab-card ${cfg.class}">
+        <div class="hab-num">${h.numero}</div>
+        <div class="hab-piso">${h.piso || '—'} · ${h.tipo || 'Habitación'}</div>
+        <div class="hab-estado ${cfg.class}">
+          <span class="estado-dot ${cfg.class}"></span>${cfg.label}
+        </div>
+        <div class="hab-meta">Última limpieza: ${ultima}</div>
+        ${h.notas ? `<div class="hab-meta" style="font-style:italic">"${h.notas}"</div>` : ''}
+        <div class="hab-actions">
+          <button class="hab-btn primary" onclick="abrirModalEstado('${h.id}','${h.numero}','${h.estado}')">Actualizar estado</button>
+          ${h.estado === 'sucia' ? `<button class="hab-btn" onclick="marcarEnProceso('${h.id}')">Iniciar limpieza</button>` : ''}
+          ${h.estado === 'en-proceso' ? `<button class="hab-btn" onclick="marcarLimpia('${h.id}','${h.numero}')">✔ Marcar limpia</button>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderDashPendientes() {
+  const pendientes = habitacionesCache.filter(h => h.estado === 'sucia' || h.estado === 'en-proceso');
+  document.getElementById('dashPendBody').innerHTML = pendientes.length
+    ? pendientes.map(h => {
+        const cfg = ESTADOS_CONFIG[h.estado];
+        const ultima = h.ultimaLimpieza?.toDate
+          ? h.ultimaLimpieza.toDate().toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
+          : '—';
+        return `<tr>
+          <td>${h.numero}</td><td>${h.piso||'—'}</td>
+          <td><span class="badge ${cfg.badge}">${cfg.label}</span></td>
+          <td>${ultima}</td><td>${h.notas||'—'}</td>
+          <td><div class="row-actions">
+            <button class="row-btn success" title="Marcar limpia" onclick="marcarLimpia('${h.id}','${h.numero}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button class="row-btn" title="Actualizar" onclick="abrirModalEstado('${h.id}','${h.numero}','${h.estado}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+            </button>
+          </div></td>
+        </tr>`;
+      }).join('')
+    : `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-dim)">
+        <span style="color:var(--green);font-weight:700">✓</span>  ¡Todo al día! Sin habitaciones pendientes.
+       </td></tr>`;
+}
+
+function poblarSelectHabitaciones() {
+  const sel = document.getElementById('incHabitacion');
+  if (!sel) return;
+  sel.innerHTML = habitacionesCache.map(h =>
+    `<option value="${h.id}">${h.numero} — ${h.piso||''} ${h.tipo||''}</option>`
+  ).join('');
+}
+
+// Marcar rápido desde la tarjeta
+window.marcarEnProceso = async (habId) => {
+  await updateDoc(doc(db,'habitaciones',habId), { estado:'en-proceso', ultimaLimpieza: serverTimestamp() });
+  await registrarActividad(habId, 'Inicio de limpieza');
+  toast('Limpieza iniciada'); loadHabitaciones();
+};
+window.marcarLimpia = async (habId, numero) => {
+  await updateDoc(doc(db,'habitaciones',habId), { estado:'limpia', notas:'', ultimaLimpieza: serverTimestamp() });
+  await registrarActividad(habId, 'Marcada como limpia');
+  toast(`Habitación ${numero} marcada como limpia ✓`); loadHabitaciones();
+};
+
+// Modal estado
+window.abrirModalEstado = (habId, numero, estadoActual) => {
+  currentHabId = habId;
+  document.getElementById('modalEstadoTitle').textContent = `HAB. ${numero}`;
+  document.getElementById('nuevoEstado').value = estadoActual;
+  document.getElementById('estadoNotas').value = '';
+  document.getElementById('modalEstado').classList.add('open');
+};
+
+document.getElementById('saveEstadoBtn').addEventListener('click', async () => {
+  const estado = document.getElementById('nuevoEstado').value;
+  const notas  = document.getElementById('estadoNotas').value.trim();
+  await updateDoc(doc(db,'habitaciones',currentHabId), {
+    estado, notas, ultimaLimpieza: serverTimestamp()
+  });
+  await registrarActividad(currentHabId, `Estado → ${ESTADOS_CONFIG[estado]?.label}`, notas);
+  closeModal('modalEstado'); toast('Estado actualizado'); loadHabitaciones();
+});
+
+// Filtros
+document.querySelectorAll('.filter-pill').forEach(pill =>
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    renderHabGrid(pill.dataset.filter);
+  })
+);
+
+// Nueva habitación
+document.getElementById('btnAddHab').addEventListener('click', () =>
+  document.getElementById('modalAddHab').classList.add('open')
+);
+document.getElementById('saveHabBtn').addEventListener('click', async () => {
+  const numero = document.getElementById('habNumero').value.trim();
+  if (!numero) { toast('Ingresa el número de habitación', true); return; }
+  await addDoc(collection(db,'habitaciones'), {
+    numero, piso: document.getElementById('habPiso').value,
+    tipo: document.getElementById('habTipo').value,
+    notas: document.getElementById('habNotas').value,
+    estado: 'sucia', ultimaLimpieza: serverTimestamp()
+  });
+  closeModal('modalAddHab'); toast(`Habitación ${numero} agregada`); loadHabitaciones();
+});
+
+// Habitaciones por defecto
+async function initDefaultHabitaciones() {
+  const defaults = [
+    { numero:'101', piso:'Piso 1', tipo:'Habitación paciente', estado:'sucia' },
+    { numero:'102', piso:'Piso 1', tipo:'Habitación paciente', estado:'limpia' },
+    { numero:'103', piso:'Piso 1', tipo:'Habitación paciente', estado:'en-proceso' },
+    { numero:'201', piso:'Piso 2', tipo:'Habitación paciente', estado:'sucia' },
+    { numero:'202', piso:'Piso 2', tipo:'Habitación paciente', estado:'limpia' },
+    { numero:'B1',  piso:'Planta baja', tipo:'Baño', estado:'limpia' },
+    { numero:'B2',  piso:'Piso 1', tipo:'Baño', estado:'sucia' },
+    { numero:'UCI-1',piso:'UCI', tipo:'Quirófano', estado:'mantenimiento' },
+    { numero:'PE-1', piso:'Pediatría', tipo:'Sala de espera', estado:'limpia' },
+    { numero:'URG-1',piso:'Urgencias', tipo:'Habitación paciente', estado:'sucia' },
+  ];
+  for (const h of defaults) {
+    await addDoc(collection(db,'habitaciones'), { ...h, notas:'', ultimaLimpieza: serverTimestamp() });
+  }
+}
+
+// ──────────────────────────────── CHECKLIST ─────────────────────────
+const CHECKLIST_ITEMS = [
+  { id:'c1',  cat:'Pisos',       texto:'Barrer y trapear el piso del pasillo principal' },
+  { id:'c2',  cat:'Pisos',       texto:'Desinfectar el piso de habitaciones ocupadas' },
+  { id:'c3',  cat:'Pisos',       texto:'Limpiar pisos de baños y sanitarios' },
+  { id:'c4',  cat:'Superficies', texto:'Limpiar pasamanos y barandales' },
+  { id:'c5',  cat:'Superficies', texto:'Desinfectar mesas y superficies de contacto' },
+  { id:'c6',  cat:'Superficies', texto:'Limpiar ventanas y vidrios de pasillos' },
+  { id:'c7',  cat:'Sanitarios',  texto:'Limpiar y desinfectar WC de cada área' },
+  { id:'c8',  cat:'Sanitarios',  texto:'Reabastecer jabón, papel y toallas de manos' },
+  { id:'c9',  cat:'Sanitarios',  texto:'Revisar dispensadores de gel antibacterial' },
+  { id:'c10', cat:'Residuos',    texto:'Recolectar y clasificar residuos generales' },
+  { id:'c11', cat:'Residuos',    texto:'Recolectar residuos biológico-infecciosos (RPBI)' },
+  { id:'c12', cat:'Residuos',    texto:'Reemplazar bolsas de botes de basura' },
+  { id:'c13', cat:'Equipos',     texto:'Limpiar equipos médicos de superficie (ex. camas)' },
+  { id:'c14', cat:'Equipos',     texto:'Desinfectar sillas de ruedas y camillas' },
+  { id:'c15', cat:'Cierre',      texto:'Reportar habitaciones listas al supervisor' },
+  { id:'c16', cat:'Cierre',      texto:'Guardar materiales y carrito de limpieza' },
+];
+
+function buildChecklist() {
+  const categorias = [...new Set(CHECKLIST_ITEMS.map(i => i.cat))];
+  const container  = document.getElementById('checklistContainer');
+  container.innerHTML = categorias.map(cat => {
+    const items = CHECKLIST_ITEMS.filter(i => i.cat === cat);
+    const doneCount = items.filter(i => checkState[i.id]).length;
+    const pct = Math.round((doneCount / items.length) * 100);
+    return `
+      <div class="checklist-section">
+        <div class="checklist-title">
+          ${cat}
+          <span class="progress-txt">${doneCount}/${items.length}</span>
+        </div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+        ${items.map(item => `
+          <div class="check-item ${checkState[item.id] ? 'done' : ''}" data-id="${item.id}">
+            <div class="check-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span class="check-text">${item.texto}</span>
+            <span class="check-cat">${item.cat}</span>
+          </div>`).join('')}
+      </div>`;
+  }).join('');
+
+  document.querySelectorAll('.check-item').forEach(el =>
+    el.addEventListener('click', () => {
+      const id = el.dataset.id;
+      checkState[id] = !checkState[id];
+      buildChecklist();
+    })
+  );
+}
+
+document.getElementById('btnGuardarChecklist').addEventListener('click', async () => {
+  const completados = Object.values(checkState).filter(Boolean).length;
+  await addDoc(collection(db,'checklistSessions'), {
+    empleadoId: me.uid,
+    turno: turno.label,
+    completados,
+    total: CHECKLIST_ITEMS.length,
+    items: checkState,
+    guardadoEn: serverTimestamp()
+  });
+  toast(`Progreso guardado: ${completados}/${CHECKLIST_ITEMS.length} tareas`);
+});
+
+document.getElementById('btnResetChecklist').addEventListener('click', () => {
+  if (!confirm('¿Reiniciar el checklist del turno?')) return;
+  checkState = {};
+  buildChecklist();
+  toast('Checklist reiniciado para nuevo turno');
+});
+
+// ──────────────────────────────── INCIDENCIAS ─────────────────────────
+async function loadIncidencias() {
+  const snap = await getDocs(query(
+    collection(db,'incidencias'),
+    where('empleadoId','==', me.uid),
+    orderBy('creadoEn','desc'), limit(30)
+  ));
+  const urgBadge = { alta:'badge-red', media:'badge-yellow', baja:'badge-green' };
+  const estBadge = { abierta:'badge-red', 'en-proceso':'badge-yellow', cerrada:'badge-green' };
+  document.getElementById('incidenciasList').innerHTML = snap.empty
+    ? '<p style="color:var(--text-dim);font-size:11px;text-align:center;padding:40px">Sin incidencias reportadas</p>'
+    : snap.docs.map(d => {
+        const inc = d.data();
+        const fecha = inc.creadoEn?.toDate?.()?.toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) || '—';
+        return `
+          <div class="incident-card">
+            <div class="incident-header">
+              <span class="incident-room">${inc.habitacion || '—'}</span>
+              <span class="incident-date">${fecha}</span>
+            </div>
+            <div class="incident-desc">${inc.descripcion || '—'}</div>
+            <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+              <span class="badge ${urgBadge[inc.urgencia]||'badge-green'}">${inc.urgencia||'baja'}</span>
+              <span class="badge ${estBadge[inc.estado]||'badge-yellow'}">${inc.estado||'abierta'}</span>
+              <span style="font-size:9px;color:var(--text-dim);margin-left:4px">${inc.tipo||''}</span>
+            </div>
+          </div>`;
+      }).join('');
+}
+
+document.getElementById('btnNewIncidencia').addEventListener('click', () =>
+  document.getElementById('modalIncidencia').classList.add('open')
+);
+document.getElementById('saveIncidenciaBtn').addEventListener('click', async () => {
+  const desc = document.getElementById('incDesc').value.trim();
+  if (!desc) { toast('Escribe una descripción', true); return; }
+  const selHab = document.getElementById('incHabitacion');
+  const habNombre = selHab.options[selHab.selectedIndex]?.text || '—';
+  await addDoc(collection(db,'incidencias'), {
+    empleadoId: me.uid,
+    habitacionId: selHab.value,
+    habitacion: habNombre,
+    tipo: document.getElementById('incTipo').value,
+    descripcion: desc,
+    urgencia: document.getElementById('incUrgencia').value,
+    estado: document.getElementById('incEstado').value,
+    creadoEn: serverTimestamp()
+  });
+  closeModal('modalIncidencia'); toast('Incidencia reportada');
+  loadIncidencias();
+});
+
+// ──────────────────────────────── HISTORIAL ─────────────────────────
+async function loadHistorial() {
+  const snap = await getDocs(query(
+    collection(db,'actividadLimpieza'),
+    where('empleadoId','==', me.uid),
+    orderBy('fecha','desc'), limit(50)
+  ));
+  document.getElementById('historialBody').innerHTML = snap.empty
+    ? '<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text-dim)">Sin actividad registrada</td></tr>'
+    : snap.docs.map(d => {
+        const a = d.data();
+        const fecha = a.fecha?.toDate?.()?.toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) || '—';
+        return `<tr><td>${a.habitacion||'—'}</td><td>${a.accion||'—'}</td><td>${fecha}</td><td>${a.notas||'—'}</td></tr>`;
+      }).join('');
+}
+
+// ──────────────────────────────── ACTIVIDAD ─────────────────────────
+async function registrarActividad(habId, accion, notas = '') {
+  const hab = habitacionesCache.find(h => h.id === habId);
+  await addDoc(collection(db,'actividadLimpieza'), {
+    empleadoId: me.uid,
+    habitacionId: habId,
+    habitacion: hab ? `${hab.numero} — ${hab.piso}` : habId,
+    accion, notas, turno: turno.label,
+    fecha: serverTimestamp()
+  });
+}
+
+// ──────────────────────────────── AUTH ─────────────────────────────
+async function resolveUser(uid) {
+  // 1. Por ID de documento en 'usuarios'
+  const snap1 = await getDoc(doc(db, 'usuarios', uid));
+  if (snap1.exists()) return { uid, ...snap1.data() };
+  // 2. Por ID de documento en 'limpieza'
+  const snap2 = await getDoc(doc(db, 'limpieza', uid));
+  if (snap2.exists()) return { uid, rol: 'limpieza', ...snap2.data() };
+  // 3. Por campo uid dentro de 'limpieza' (documento con ID fijo)
+  try {
+    const q = query(collection(db, 'limpieza'), where('uid', '==', uid));
+    const qs = await getDocs(q);
+    if (!qs.empty) return { uid, rol: 'limpieza', ...qs.docs[0].data() };
+  } catch(_) {}
+  return null;
+}
+
+async function init(user) {
+  const userData = await resolveUser(user.uid);
+  if (!userData || userData.rol !== 'limpieza') {
+    console.warn('Acceso denegado. Rol encontrado:', userData?.rol, '| Buscado: limpieza');
+    window.location.href = 'login.html'; return;
+  }
+  me = userData;
+  document.getElementById('userAvatar').textContent = (me.nombre || 'L')[0].toUpperCase();
+  document.getElementById('userName').textContent   = me.nombre || 'Empleado';
+  document.getElementById('dashGreet').textContent  = (me.nombre || 'EMPLEADO').toUpperCase();
+
+  buildChecklist();
+  await loadHabitaciones();
+  await loadHistorial();
+  await loadIncidencias();
+}
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await signOut(auth); window.location.href = 'login.html';
+});
+
+onAuthStateChanged(auth, user => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  init(user);
+});
+</script>
+</body>
+</html>

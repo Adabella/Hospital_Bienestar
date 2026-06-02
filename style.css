@@ -1,0 +1,289 @@
+/* =========================================
+   1. REINICIO Y VARIABLES
+========================================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --dark-teal: #ffffff;
+  --panel-bg: rgba(13, 43, 37, 0.4); /* Fondo semi-transparente para el cristal */
+  --input-border: rgba(255, 255, 255, 0.25);
+  --input-focus: rgba(255, 255, 255, 0.7);
+  --text-primary: #f0ede6ea;
+  --text-muted: rgba(240, 237, 230, 0.55);
+  --accent: #e8e3d8;
+  --input-bor:#000000;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'DM Sans', sans-serif;
+  overflow-x: hidden;
+}
+
+/* =========================================
+   2. VIDEO DE FONDO Y CAPA OSCURA
+========================================= */
+.bg-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover; /* Evita que el video se estire o deforme */
+  z-index: -2; /* Lo manda al fondo de todo */
+}
+
+.video-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4); /* Oscurece el video un 40% */
+  z-index: -1; /* Se pone entre el video y el formulario */
+}
+
+/* =========================================
+   3. ESTRUCTURA Y GLASSMORPHISM
+========================================= */
+.layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  position: relative;
+  z-index: 1; /* Asegura que el formulario esté por encima del video */
+}
+
+.form-panel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 52px;
+  background: var(--panel-bg);
+  
+  /* El efecto de desenfoque (Glassmorphism) */
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  
+  /* Bordes y sombras del cuadro */
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  
+  width: 100%;
+  max-width: 480px;
+  overflow: hidden;
+}
+
+/* Textura de ruido sutil para darle realismo al cristal */
+.form-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none;
+  opacity: 0.5;
+  border-radius: 24px;
+}
+
+/* =========================================
+   4. ELEMENTOS INTERNOS DEL FORMULARIO
+========================================= */
+.form-inner {
+  position: relative;
+  width: 100%;
+  animation: fadeUp 0.7s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 3.2rem;
+  font-weight: 400;
+  color: var(--text-primary);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  margin-bottom: 10px;
+}
+
+.subheading {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 44px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+
+.field {
+  margin-bottom: 28px;
+}
+
+.field label {
+  display: block;
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  letter-spacing: 0.04em;
+}
+
+.field input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--input-border);
+  padding: 10px 0 12px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  transition: border-color 0.25s;
+  letter-spacing: 0.02em;
+}
+
+.field input::placeholder {
+  color: rgba(240, 237, 230, 0.32);
+  font-weight: 300;
+}
+
+.field input:focus {
+  border-bottom-color: var(--input-focus);
+}
+
+.field input[type="password"] {
+  letter-spacing: 0.22em;
+}
+
+.row-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 40px;
+}
+
+.remember {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.remember input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.2s;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+.remember input[type="checkbox"]:checked {
+  border-color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.remember input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 4px;
+  width: 4px;
+  height: 8px;
+  border: 1.5px solid var(--text-primary);
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+
+.remember span {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+.forgot {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 400;
+  transition: color 0.2s;
+}
+
+.forgot:hover {
+  color: var(--text-primary);
+}
+
+.btn-login {
+  width: 100%;
+  padding: 17px;
+  background: var(--input-bor);
+  color: var(--dark-teal);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.25s, transform 0.15s;
+  margin-bottom: 28px;
+}
+
+.btn-login:hover {
+  background: #00000083;
+  transform: translateY(-1px);
+}
+
+.btn-login:active {
+  transform: translateY(0);
+}
+
+.register-line {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.register-line a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 500;
+  margin-left: 4px;
+  border-bottom: 1px solid rgba(240, 237, 230, 0.3);
+  padding-bottom: 1px;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.register-line a:hover {
+  border-bottom-color: var(--text-primary);
+}
+
+/* =========================================
+   5. RESPONSIVO (MÓVILES)
+========================================= */
+@media (max-width: 720px) {
+  .form-panel {
+    padding: 40px 24px;
+  }
+
+  .heading {
+    font-size: 2.4rem;
+  }
+}
