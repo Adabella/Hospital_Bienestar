@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Portal Administrativo — Hospital Bienestar Prime</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --g:#3ddb72;--gd:#0f5c2e;--gm:#27ae60;
+  --bg:#020d0a;--s:#030e08;--b2:#040f0b;--b3:#061209;
+  --bdr:rgba(255,255,255,0.07);--gl:rgba(255,255,255,0.04);--glh:rgba(255,255,255,0.07);
+  --t:rgba(255,255,255,0.88);--td:rgba(255,255,255,0.42);
+  --red:#e05252;--yellow:#dbb63d;--blue:#5b9cf6;--purple:#a78bfa;
+  --sw:230px;--th:58px;
+}
+html,body{height:100%;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t);}
+button,input,select,textarea{font-family:inherit;}
+::selection{background:rgba(61,219,114,0.2);}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px;}
+
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--th);z-index:200;display:flex;align-items:center;background:rgba(3,14,8,0.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);}
+.tb-brand{width:var(--sw);flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 16px;border-right:1px solid var(--bdr);height:100%;}
+.tb-logo{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:#fff;line-height:1.1;}
+.tb-logo span{color:var(--g);}
+.tb-badge{font-size:6.5px;letter-spacing:2px;text-transform:uppercase;background:rgba(91,156,246,0.15);color:var(--blue);border:1px solid rgba(91,156,246,0.3);padding:2px 8px;border-radius:20px;}
+.tb-right{display:flex;align-items:center;gap:10px;margin-left:auto;padding-right:16px;}
+.tb-clock{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--g);background:var(--gl);border:1px solid var(--bdr);padding:5px 12px;border-radius:5px;}
+.tb-icon{width:32px;height:32px;border-radius:7px;background:var(--gl);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--td);transition:all .2s;position:relative;}
+.tb-icon:hover{background:var(--glh);color:#fff;}
+.tb-icon svg{width:14px;height:14px;stroke-width:1.8;}
+.tb-notif{position:absolute;top:-3px;right:-3px;width:13px;height:13px;border-radius:50%;background:var(--red);color:#fff;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.tb-user{display:flex;align-items:center;gap:8px;background:var(--gl);border:1px solid var(--bdr);border-radius:7px;padding:4px 10px 4px 4px;cursor:pointer;}
+.tb-avatar{width:26px;height:26px;border-radius:50%;background:rgba(91,156,246,0.2);border:1.5px solid rgba(91,156,246,0.3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--blue);}
+.tb-uname{font-size:10px;font-weight:600;color:#fff;}
+.tb-urole{font-size:7px;letter-spacing:1px;text-transform:uppercase;color:var(--blue);}
+
+.layout{display:flex;height:100vh;padding-top:var(--th);}
+
+.sidebar{width:var(--sw);flex-shrink:0;background:var(--s);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:thin;}
+.ns{padding:14px 0 4px;}
+.nsl{font-size:6.5px;letter-spacing:2.5px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,0.18);padding:0 16px 7px;}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 16px;cursor:pointer;font-size:10px;font-weight:500;color:rgba(255,255,255,0.4);border-left:2px solid transparent;transition:all .18s;}
+.ni:hover{color:rgba(255,255,255,0.8);background:var(--gl);}
+.ni.active{color:var(--g);border-left-color:var(--g);background:rgba(61,219,114,0.05);}
+.ni svg{width:14px;height:14px;stroke-width:1.8;flex-shrink:0;}
+.npill{margin-left:auto;background:var(--g);color:#020d0a;font-size:7px;font-weight:700;padding:2px 6px;border-radius:8px;}
+.npill.r{background:var(--red);color:#fff;}
+.npill.b{background:var(--blue);color:#fff;}
+.sf{margin-top:auto;padding:12px 14px;border-top:1px solid var(--bdr);}
+.lbtn{width:100%;display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:5px;background:none;border:1px solid var(--bdr);color:var(--td);cursor:pointer;font-size:9.5px;font-weight:600;transition:all .2s;}
+.lbtn:hover{background:rgba(224,82,82,0.1);border-color:rgba(224,82,82,0.3);color:var(--red);}
+.lbtn svg{width:13px;height:13px;stroke-width:1.8;}
+
+.main{flex:1;overflow-y:auto;overflow-x:hidden;background:var(--bg);}
+.panel{display:none;padding:24px 28px 40px;}
+.panel.active{display:block;}
+
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px;}
+.ph-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(24px,3vw,36px);line-height:.95;color:#fff;}
+.ph-title span{color:var(--g);}
+.ph-sub{font-size:10px;color:var(--td);margin-top:4px;}
+.pacts{display:flex;gap:8px;flex-wrap:wrap;}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:5px;border:none;cursor:pointer;font-size:8px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;transition:all .2s;font-family:inherit;}
+.btn-g{background:var(--g);color:#020d0a;}
+.btn-g:hover{background:#5df08d;transform:translateY(-1px);}
+.btn-ghost{background:var(--gl);border:1px solid var(--bdr);color:rgba(255,255,255,0.6);}
+.btn-ghost:hover{background:var(--glh);color:#fff;}
+.btn-b{background:rgba(91,156,246,0.12);border:1px solid rgba(91,156,246,0.3);color:var(--blue);}
+.btn-b:hover{background:rgba(91,156,246,0.2);}
+.btn svg{width:12px;height:12px;stroke-width:2;}
+
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.metric{background:var(--gl);border:1px solid var(--bdr);border-radius:7px;padding:18px 16px;position:relative;overflow:hidden;transition:border-color .25s,transform .2s;}
+.metric:hover{border-color:rgba(61,219,114,0.25);transform:translateY(-2px);}
+.metric::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g);opacity:0;transition:opacity .3s;}
+.metric:hover::after{opacity:1;}
+.mi{position:absolute;top:14px;right:12px;width:32px;height:32px;border-radius:7px;background:var(--gd);border:1px solid rgba(61,219,114,0.2);display:flex;align-items:center;justify-content:center;}
+.mi svg{width:15px;height:15px;stroke:var(--g);stroke-width:1.8;}
+.mn{font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;color:var(--g);}
+.ml{font-size:7px;letter-spacing:1.5px;font-weight:600;text-transform:uppercase;color:var(--td);margin-top:3px;}
+.md{font-size:8.5px;font-weight:600;margin-top:7px;}
+.du{color:var(--g);}.dd{color:var(--red);}
+
+.card{background:var(--gl);border:1px solid var(--bdr);border-radius:7px;overflow:hidden;margin-bottom:16px;}
+.ch{padding:13px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.ct{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.5px;color:#fff;}
+.cb{padding:16px;}
+
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:10.5px;}
+thead th{text-align:left;padding:9px 12px;font-size:7px;letter-spacing:1.8px;font-weight:700;text-transform:uppercase;color:var(--td);border-bottom:1px solid var(--bdr);white-space:nowrap;}
+tbody tr{border-bottom:1px solid rgba(255,255,255,0.03);transition:background .15s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--gl);}
+tbody td{padding:10px 12px;color:rgba(255,255,255,0.7);vertical-align:middle;}
+tbody td:first-child{font-weight:600;color:#fff;}
+
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:7px;letter-spacing:1.2px;font-weight:700;text-transform:uppercase;}
+.bg{background:rgba(61,219,114,0.12);color:var(--g);border:1px solid rgba(61,219,114,0.25);}
+.by{background:rgba(219,182,61,0.12);color:var(--yellow);border:1px solid rgba(219,182,61,0.25);}
+.br{background:rgba(224,82,82,0.12);color:var(--red);border:1px solid rgba(224,82,82,0.25);}
+.bb{background:rgba(91,156,246,0.12);color:var(--blue);border:1px solid rgba(91,156,246,0.25);}
+.bp{background:rgba(167,139,250,0.12);color:var(--purple);border:1px solid rgba(167,139,250,0.25);}
+
+.ra{display:flex;gap:4px;}
+.rb{width:26px;height:26px;border-radius:4px;background:var(--gl);border:1px solid var(--bdr);color:var(--td);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+.rb:hover{background:var(--glh);color:#fff;}
+.rb.rd:hover{background:rgba(224,82,82,0.1);color:var(--red);border-color:rgba(224,82,82,0.3);}
+.rb.rs:hover{background:rgba(61,219,114,0.1);color:var(--g);border-color:rgba(61,219,114,0.3);}
+.rb svg{width:11px;height:11px;stroke-width:2;}
+
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.fg.full{grid-column:span 2;}
+.fl{font-size:7px;letter-spacing:1.8px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,0.38);}
+.fi,.fs,.fta{width:100%;background:var(--gl);border:1px solid var(--bdr);border-radius:5px;padding:9px 12px;font-size:11px;color:var(--t);outline:none;transition:border-color .2s;-webkit-appearance:none;}
+.fi::placeholder,.fta::placeholder{color:rgba(255,255,255,0.15);}
+.fi:focus,.fs:focus,.fta:focus{border-color:rgba(61,219,114,0.3);background:rgba(61,219,114,0.03);}
+.fs{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:32px;cursor:pointer;}
+.fs option{background:#040f0b;}
+.fta{resize:vertical;min-height:70px;}
+
+.mo{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px;}
+.mo.open{display:flex;}
+.mbox{background:var(--b2);border:1px solid var(--bdr);border-radius:8px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,0.6);animation:mIn .25s ease;}
+@keyframes mIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.mhdr{padding:18px 20px 14px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;}
+.mtitle{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.5px;color:#fff;}
+.mclose{width:26px;height:26px;border-radius:5px;background:var(--gl);border:1px solid var(--bdr);color:var(--td);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.mclose:hover{background:var(--glh);color:#fff;}
+.mbody{padding:20px;}
+.mfoot{padding:12px 20px;border-top:1px solid var(--bdr);display:flex;justify-content:flex-end;gap:8px;}
+
+.ts{position:fixed;bottom:18px;right:18px;z-index:500;display:flex;flex-direction:column;gap:7px;}
+.toast{display:flex;align-items:center;gap:9px;background:rgba(3,14,8,0.97);border:1px solid rgba(61,219,114,0.3);border-radius:6px;padding:10px 14px;font-size:10.5px;box-shadow:0 8px 32px rgba(0,0,0,0.4);animation:tIn .3s ease;}
+@keyframes tIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+.toast svg{width:14px;height:14px;stroke:var(--g);flex-shrink:0;}
+
+@media(max-width:1100px){.metrics{grid-template-columns:repeat(2,1fr)}.fgrid{grid-template-columns:1fr}}
+@media(max-width:768px){.sidebar{display:none}.panel{padding:16px 14px 32px}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="tb-brand">
+    <div>
+      <div class="tb-logo">HOSPI<span>TAL</span> BIENESTAR</div>
+      <div style="font-size:6.5px;letter-spacing:1.5px;color:var(--td);text-transform:uppercase;margin-top:1px">Portal Administrativo</div>
+    </div>
+    <span class="tb-badge">ADMIN</span>
+  </div>
+  <div class="tb-right">
+    <div class="tb-clock" id="clock">00:00:00</div>
+    <div class="tb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="tb-notif" id="notifCount">0</span></div>
+    <div class="tb-user">
+      <div class="tb-avatar" id="adminAvatar">AD</div>
+      <div><div class="tb-uname" id="adminName">Administrador</div><div class="tb-urole">Administración</div></div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+<aside class="sidebar">
+  <div class="ns">
+    <div class="nsl">Principal</div>
+    <div class="ni active" data-p="resumen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Resumen del día</div>
+  </div>
+  <div class="ns">
+    <div class="nsl">Operaciones</div>
+    <div class="ni" data-p="citas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Citas<span class="npill" id="cntCitas">0</span></div>
+    <div class="ni" data-p="usuarios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Usuarios<span class="npill b" id="cntUsers">0</span></div>
+    <div class="ni" data-p="signos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Signos Vitales</div>
+  </div>
+  <div class="ns">
+    <div class="nsl">Configuración</div>
+    <div class="ni" data-p="reportes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Reportes</div>
+  </div>
+  <div class="sf">
+    <div style="font-size:9px;color:var(--td);margin-bottom:8px;font-family:'JetBrains Mono',monospace" id="sideDate"></div>
+    <button class="lbtn" id="logoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Cerrar Sesión</button>
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- ══ RESUMEN ══ -->
+<div class="panel active" id="panel-resumen">
+  <div class="ph">
+    <div><div class="ph-title">RESUMEN <span>DEL DÍA</span></div><div class="ph-sub" id="dashDate"></div></div>
+    <div class="pacts">
+      <button class="btn btn-g" onclick="crearDatosPrueba()" id="btnDatosPrueba">+ Cargar Datos de Prueba</button>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="mn" id="mTP">—</div><div class="ml">Total Usuarios</div></div>
+    <div class="metric"><div class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="mn" id="mCH">—</div><div class="ml">Citas Registradas</div></div>
+    <div class="metric"><div class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="mn" id="mMD">—</div><div class="ml">Doctores</div></div>
+    <div class="metric"><div class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="mn" id="mStaff">—</div><div class="ml">Personal</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="card">
+      <div class="ch"><div class="ct">ÚLTIMOS USUARIOS REGISTRADOS</div></div>
+      <div class="tw"><table><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Fecha</th></tr></thead><tbody id="resUsers"><tr><td colspan="4" style="text-align:center;color:var(--td);padding:16px">Cargando…</td></tr></tbody></table></div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct">USUARIOS POR ROL</div></div>
+      <div class="cb" id="resRoles" style="font-size:10px;color:var(--td)">Cargando…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CITAS ══ -->
+<div class="panel" id="panel-citas">
+  <div class="ph">
+    <div><div class="ph-title">GESTIÓN DE <span>CITAS</span></div><div class="ph-sub">Todas las citas registradas en el sistema</div></div>
+    <div class="pacts">
+      <button class="btn btn-g" onclick="openM('mCita')">+ Nueva Cita</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="tw"><tr><thead><tr><th>Paciente</th><th>Doctor</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="citasBody"><tr><td colspan="6" style="text-align:center;color:var(--td);padding:20px">Cargando…</td></tr></tbody></table></div>
+  </div>
+</div>
+
+<!-- ══ USUARIOS ══ -->
+<div class="panel" id="panel-usuarios">
+  <div class="ph">
+    <div><div class="ph-title">GESTIÓN DE <span>USUARIOS</span></div><div class="ph-sub">Todos los usuarios del sistema (pacientes, doctores, personal)</div></div>
+    <div class="pacts">
+      <input class="fi" style="width:200px" type="text" placeholder="Buscar usuario…" id="sUser" oninput="filtUsers()">
+      <select class="fs" style="width:130px" id="fRol" onchange="filtUsers()"><option value="">Todos</option><option value="admin">Admin</option><option value="doctor">Doctor</option><option value="enfermera">Enfermera</option><option value="limpieza">Limpieza</option><option value="paciente">Paciente</option></select>
+    </div>
+  </div>
+  <div class="card">
+    <div class="tw"><table><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Especialidad/Área</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="usersBody"><tr><td colspan="6" style="text-align:center;color:var(--td);padding:20px">Cargando…</td></tr></tbody></table></div>
+  </div>
+</div>
+
+<!-- ══ SIGNOS VITALES ══ -->
+<div class="panel" id="panel-signos">
+  <div class="ph">
+    <div><div class="ph-title">REGISTRO DE <span>SIGNOS VITALES</span></div><div class="ph-sub">Historial de signos vitales por paciente</div></div>
+  </div>
+  <div class="card">
+    <div class="tw"><table><thead><tr><th>Paciente</th><th>Presión</th><th>Temperatura</th><th>Pulso</th><th>Fecha</th><th>Registrado por</th></tr></thead><tbody id="signosBody"><tr><td colspan="6" style="text-align:center;color:var(--td);padding:20px">Cargando…</td></tr></tbody></table></div>
+  </div>
+</div>
+
+<!-- ══ REPORTES ══ -->
+<div class="panel" id="panel-reportes">
+  <div class="ph">
+    <div><div class="ph-title">REPORTES Y <span>ESTADÍSTICAS</span></div></div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="mn" id="rTotalUsers">—</div><div class="ml">Total Usuarios</div></div>
+    <div class="metric"><div class="mn" id="rPacientes">—</div><div class="ml">Pacientes</div></div>
+    <div class="metric"><div class="mn" id="rDoctores">—</div><div class="ml">Doctores</div></div>
+    <div class="metric"><div class="mn" id="rStaff">—</div><div class="ml">Personal</div></div>
+  </div>
+  <div class="card">
+    <div class="ch"><div class="ct">DISTRIBUCIÓN DE USUARIOS</div></div>
+    <div class="cb" id="chartRoles" style="min-height:200px;display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;"></div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- MODAL NUEVA CITA -->
+<div class="mo" id="mCita">
+  <div class="mbox">
+    <div class="mhdr"><div class="mtitle">NUEVA CITA</div><button class="mclose" onclick="closeM('mCita')">✕</button></div>
+    <div class="mbody">
+      <div class="fgrid">
+        <div class="fg full"><label class="fl">Paciente (UID)</label><input class="fi" id="nc_pacienteId" type="text" placeholder="UID del paciente"></div>
+        <div class="fg full"><label class="fl">Médico (UID)</label><input class="fi" id="nc_medicoId" type="text" placeholder="UID del médico"></div>
+        <div class="fg"><label class="fl">Fecha</label><input class="fi" id="nc_fecha" type="date"></div>
+        <div class="fg"><label class="fl">Hora</label><input class="fi" id="nc_hora" type="time"></div>
+        <div class="fg full"><label class="fl">Motivo</label><textarea class="fta" id="nc_motivo" placeholder="Motivo de la consulta"></textarea></div>
+      </div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeM('mCita')">Cancelar</button><button class="btn btn-g" onclick="guardarCita()">Guardar Cita</button></div>
+  </div>
+</div>
+
+<div class="ts" id="ts"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, serverTimestamp, where, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCtve3i6HRbmigXrRIXNa8A2KmNCItqurw",
+  authDomain: "hospital-bienestar.firebaseapp.com",
+  projectId: "hospital-bienestar",
+  storageBucket: "hospital-bienestar.firebasestorage.app",
+  messagingSenderId: "296686621012",
+  appId: "1:296686621012:web:2664e71671f69ec17278c1"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+let allUsers = [];
+let allCitas = [];
+let allSignos = [];
+
+// ============ VERIFICACIÓN DE ADMIN ============
+onAuthStateChanged(auth, async (user) => {
+
+  if (!user) {
+    window.location.href = '/login.html';
+    return;
+  }
+
+  try {
+
+    const usuariosRef = collection(db, "usuarios");
+
+    const q = query(
+      usuariosRef,
+      where("email", "==", user.email)
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      alert("Usuario no encontrado en Firestore");
+      window.location.href = "/login.html";
+      return;
+    }
+
+    const userData = querySnapshot.docs[0].data();
+
+    console.log("Usuario encontrado:", userData);
+
+    if (userData.rol !== "admin") {
+      alert("No tienes permisos de administrador");
+      window.location.href = "/login.html";
+      return;
+    }
+
+    document.getElementById("adminName").textContent =
+      userData.nombre || "Administrador";
+
+    document.getElementById("adminAvatar").textContent =
+      (userData.nombre || "AD")
+      .substring(0, 2)
+      .toUpperCase();
+
+    await cargarTodosLosDatos();
+
+  } catch (error) {
+    console.error("Error verificando administrador:", error);
+    alert(error.message);
+    window.location.href = "/login.html";
+  }
+
+});
+
+// ============ FUNCIÓN PARA CREAR DATOS DE PRUEBA ============
+window.crearDatosPrueba = async function() {
+  const btn = document.getElementById('btnDatosPrueba');
+  btn.disabled = true;
+  btn.textContent = 'CARGANDO...';
+  
+  try {
+    // 1. Crear usuarios de prueba si no existen
+    const usuariosExistentes = await getDocs(collection(db, 'usuarios'));
+    const emailsExistentes = new Set();
+    usuariosExistentes.forEach(doc => emailsExistentes.add(doc.data().email));
+    
+    const usuariosPrueba = [
+      { nombre: 'Carlos', apellidos: 'Mendoza Pérez', email: 'dr.mendoza@bienestar.mx', rol: 'doctor', especialidad: 'Cardiología', cedula: '1234567' },
+      { nombre: 'Laura', apellidos: 'Vega Ramírez', email: 'dra.vega@bienestar.mx', rol: 'doctor', especialidad: 'Fisiatría', cedula: '2345678' },
+      { nombre: 'Ana', apellidos: 'Torres García', email: 'dra.torres@bienestar.mx', rol: 'doctor', especialidad: 'Medicina Preventiva', cedula: '3456789' },
+      { nombre: 'María', apellidos: 'López Hernández', email: 'enfermera.maria@bienestar.mx', rol: 'enfermera', numEmpleado: 'ENF-001', area: 'Urgencias' },
+      { nombre: 'Juan', apellidos: 'Paciente García', email: 'paciente.juan@example.com', rol: 'paciente', curp: 'PAGJ900101HDFRCN01', telefono: '4421234567' }
+    ];
+    
+    for (const userData of usuariosPrueba) {
+      if (!emailsExistentes.has(userData.email)) {
+        const userRef = doc(db, 'usuarios', userData.email.replace(/[^a-zA-Z0-9]/g, '_'));
+        await setDoc(userRef, {
+          uid: userData.email.replace(/[^a-zA-Z0-9]/g, '_'),
+          ...userData,
+          activo: true,
+          creadoEn: serverTimestamp()
+        });
+        console.log(`Usuario creado: ${userData.email}`);
+      }
+    }
+    
+    // 2. Crear citas de prueba
+    const usersSnapshot = await getDocs(collection(db, 'usuarios'));
+    const pacientes = [];
+    const doctores = [];
+    
+    usersSnapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.rol === 'paciente') pacientes.push({ id: doc.id, ...data });
+      if (data.rol === 'doctor') doctores.push({ id: doc.id, ...data });
+    });
+    
+    if (pacientes.length > 0 && doctores.length > 0) {
+      const citasExistentes = await getDocs(collection(db, 'citas'));
+      if (citasExistentes.empty) {
+        const hoy = new Date().toISOString().split('T')[0];
+        const citasPrueba = [
+          { pacienteId: pacientes[0].id, pacienteNombre: pacientes[0].nombre + ' ' + (pacientes[0].apellidos || ''), medicoId: doctores[0].id, medicoNombre: doctores[0].nombre + ' ' + (doctores[0].apellidos || ''), fecha: hoy, hora: '10:00', estado: 'pendiente', motivo: 'Dolor de pecho' },
+          { pacienteId: pacientes[0].id, pacienteNombre: pacientes[0].nombre + ' ' + (pacientes[0].apellidos || ''), medicoId: doctores[1]?.id || doctores[0].id, medicoNombre: doctores[1]?.nombre + ' ' + (doctores[1]?.apellidos || ''), fecha: hoy, hora: '11:30', estado: 'confirmada', motivo: 'Revisión anual' }
+        ];
+        
+        for (const cita of citasPrueba) {
+          await addDoc(collection(db, 'citas'), {
+            ...cita,
+            creadoEn: serverTimestamp()
+          });
+        }
+        console.log('Citas de prueba creadas');
+      }
+    }
+    
+    toast('✅ Datos de prueba cargados correctamente');
+    await cargarTodosLosDatos();
+    
+  } catch (error) {
+    console.error('Error creando datos:', error);
+    toast('❌ Error al cargar datos: ' + error.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '+ Cargar Datos de Prueba';
+  }
+};
+
+// ============ CARGAR TODOS LOS DATOS ============
+async function cargarTodosLosDatos() {
+  await Promise.all([
+    cargarUsuarios(),
+    cargarCitas(),
+    cargarSignosVitales()
+  ]);
+}
+
+async function cargarUsuarios() {
+  try {
+    const snapshot = await getDocs(collection(db, 'usuarios'));
+    allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    document.getElementById('mTP').textContent = allUsers.length;
+    document.getElementById('cntUsers').textContent = allUsers.length;
+    document.getElementById('rTotalUsers').textContent = allUsers.length;
+    document.getElementById('rPacientes').textContent = allUsers.filter(u => u.rol === 'paciente').length;
+    document.getElementById('rDoctores').textContent = allUsers.filter(u => u.rol === 'doctor').length;
+    document.getElementById('rStaff').textContent = allUsers.filter(u => ['enfermera', 'limpieza'].includes(u.rol)).length;
+    document.getElementById('mMD').textContent = allUsers.filter(u => u.rol === 'doctor').length;
+    document.getElementById('mStaff').textContent = allUsers.filter(u => ['enfermera', 'limpieza'].includes(u.rol)).length;
+    
+    renderUltimosUsuarios(allUsers.slice(0, 5));
+    renderRolesChart();
+    renderUsuarios(allUsers);
+    
+  } catch (error) {
+    console.error('Error cargando usuarios:', error);
+  }
+}
+
+function renderUltimosUsuarios(usuarios) {
+  const tbody = document.getElementById('resUsers');
+  if (!usuarios.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--td);padding:16px">No hay usuarios registrados. Haz clic en "Cargar Datos de Prueba"</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = usuarios.map(u => `
+    <tr>
+      <td>${u.nombre || ''} ${u.apellidos || ''}</td>
+      <td style="font-family:monospace;font-size:9px">${u.email || '—'}</td>
+      <td><span class="badge ${u.rol === 'admin' ? 'bg' : (u.rol === 'doctor' ? 'bb' : 'by')}">${u.rol || '—'}</span></td>
+      <td>${u.creadoEn?.toDate?.()?.toLocaleDateString('es-MX') || '—'}</td>
+    </tr>
+  `).join('');
+}
+
+function renderRolesChart() {
+  const roles = {};
+  allUsers.forEach(u => { roles[u.rol] = (roles[u.rol] || 0) + 1; });
+  
+  const colores = { admin: '#3ddb72', doctor: '#5b9cf6', enfermera: '#dbb63d', limpieza: '#a78bfa', paciente: '#e05252' };
+  const container = document.getElementById('resRoles');
+  const chartContainer = document.getElementById('chartRoles');
+  
+  const html = Object.entries(roles).map(([rol, count]) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr)">
+      <span style="display:flex;align-items:center;gap:8px">
+        <div style="width:10px;height:10px;border-radius:50%;background:${colores[rol] || '#fff'}"></div>
+        <span style="text-transform:capitalize">${rol}</span>
+      </span>
+      <span class="badge bg">${count}</span>
+    </div>
+  `).join('');
+  
+  container.innerHTML = html || '<div style="padding:20px;text-align:center">No hay datos</div>';
+  
+  if (chartContainer) {
+    chartContainer.innerHTML = Object.entries(roles).map(([rol, count]) => `
+      <div style="text-align:center">
+        <div style="font-family:Bebas Neue;font-size:32px;color:${colores[rol] || '#fff'}">${count}</div>
+        <div style="font-size:9px;text-transform:uppercase;color:var(--td)">${rol}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function renderUsuarios(usuarios) {
+  const tbody = document.getElementById('usersBody');
+  if (!usuarios.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--td);padding:20px">No hay usuarios registrados</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = usuarios.map(u => `
+    <tr>
+      <td><strong>${u.nombre || ''} ${u.apellidos || ''}</strong></td>
+      <td style="font-family:monospace;font-size:9px">${u.email || '—'}</td>
+      <td><span class="badge ${u.rol === 'admin' ? 'bg' : (u.rol === 'doctor' ? 'bb' : 'by')}">${u.rol || '—'}</span></td>
+      <td>${u.especialidad || u.area || u.numEmpleado || '—'}</td>
+      <td><span class="badge ${u.activo !== false ? 'bg' : 'br'}">${u.activo !== false ? 'Activo' : 'Inactivo'}</span></td>
+      <td><div class="ra"><button class="rb rd" onclick="toggleUserStatus('${u.id}', ${!u.activo})" title="${u.activo ? 'Desactivar' : 'Activar'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></button></div></td>
+    </tr>
+  `).join('');
+}
+
+window.toggleUserStatus = async (uid, activar) => {
+  try {
+    await updateDoc(doc(db, 'usuarios', uid), { activo: activar });
+    toast(`Usuario ${activar ? 'activado' : 'desactivado'}`);
+    await cargarUsuarios();
+  } catch (error) {
+    toast('Error: ' + error.message);
+  }
+};
+
+async function cargarCitas() {
+  try {
+    const snapshot = await getDocs(query(collection(db, 'citas'), orderBy('creadoEn', 'desc')));
+    allCitas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    document.getElementById('mCH').textContent = allCitas.length;
+    document.getElementById('cntCitas').textContent = allCitas.length;
+    renderCitas(allCitas);
+  } catch (error) {
+    console.error('Error cargando citas:', error);
+  }
+}
+
+function renderCitas(citas) {
+  const tbody = document.getElementById('citasBody');
+  if (!citas.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--td);padding:20px">No hay citas registradas</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = citas.map(c => `
+    <tr>
+      <td>${c.pacienteNombre || c.pacienteId || '—'}</td>
+      <td>${c.medicoNombre || c.medicoId || '—'}</td>
+      <td>${c.fecha || '—'}</td>
+      <td style="font-family:monospace">${c.hora || '—'}</td>
+      <td><span class="badge ${c.estado === 'confirmada' ? 'bg' : (c.estado === 'cancelada' ? 'br' : 'by')}">${c.estado || 'pendiente'}</span></td>
+      <td><div class="ra"><button class="rb rd" onclick="eliminarCita('${c.id}')" title="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg></button></div></td>
+    </tr>
+  `).join('');
+}
+
+window.eliminarCita = async (id) => {
+  if (!confirm('¿Eliminar esta cita?')) return;
+  try {
+    await deleteDoc(doc(db, 'citas', id));
+    toast('Cita eliminada');
+    await cargarCitas();
+  } catch (error) {
+    toast('Error: ' + error.message);
+  }
+};
+
+window.guardarCita = async () => {
+  const pacienteId = document.getElementById('nc_pacienteId').value.trim();
+  const medicoId = document.getElementById('nc_medicoId').value.trim();
+  const fecha = document.getElementById('nc_fecha').value;
+  const hora = document.getElementById('nc_hora').value;
+  
+  if (!pacienteId || !medicoId || !fecha || !hora) {
+    toast('⚠️ Completa todos los campos');
+    return;
+  }
+  
+  try {
+    const pacienteDoc = await getDoc(doc(db, 'usuarios', pacienteId));
+    const medicoDoc = await getDoc(doc(db, 'usuarios', medicoId));
+    
+    await addDoc(collection(db, 'citas'), {
+      pacienteId, pacienteNombre: pacienteDoc.exists() ? (pacienteDoc.data().nombre + ' ' + (pacienteDoc.data().apellidos || '')) : pacienteId,
+      medicoId, medicoNombre: medicoDoc.exists() ? (medicoDoc.data().nombre + ' ' + (medicoDoc.data().apellidos || '')) : medicoId,
+      fecha, hora,
+      motivo: document.getElementById('nc_motivo').value,
+      estado: 'pendiente',
+      creadoEn: serverTimestamp()
+    });
+    
+    closeM('mCita');
+    toast('✅ Cita creada');
+    await cargarCitas();
+  } catch (error) {
+    toast('❌ Error: ' + error.message);
+  }
+};
+
+async function cargarSignosVitales() {
+  try {
+    const snapshot = await getDocs(query(collection(db, 'signosVitales'), orderBy('fecha', 'desc')));
+    allSignos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderSignos(allSignos.slice(0, 20));
+  } catch (error) {
+    console.error('Error cargando signos:', error);
+  }
+}
+
+function renderSignos(signos) {
+  const tbody = document.getElementById('signosBody');
+  if (!signos.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--td);padding:20px">No hay registros de signos vitales</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = signos.map(s => `
+    <tr>
+      <td>${s.pacienteId || '—'}</td>
+      <td>${s.presion || '—'}</td>
+      <td>${s.temperatura || '—'} °C</td>
+      <td>${s.pulso || '—'} bpm</td>
+      <td>${s.fecha?.toDate?.()?.toLocaleString('es-MX') || '—'}</td>
+      <td>${s.registradoPor || '—'}</td>
+    </tr>
+  `).join('');
+}
+
+// ============ FILTROS ============
+window.filtUsers = () => {
+  const query = document.getElementById('sUser')?.value.toLowerCase() || '';
+  const rol = document.getElementById('fRol')?.value || '';
+  let filtered = allUsers;
+  if (query) filtered = filtered.filter(u => (u.nombre + ' ' + (u.apellidos || '') + ' ' + (u.email || '')).toLowerCase().includes(query));
+  if (rol) filtered = filtered.filter(u => u.rol === rol);
+  renderUsuarios(filtered);
+};
+
+// ============ NAVEGACIÓN ============
+window.nav = function(id) {
+  document.querySelectorAll('.ni').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.ni[data-p="${id}"]`)?.classList.add('active');
+  document.getElementById(`panel-${id}`)?.classList.add('active');
+  document.querySelector('.main').scrollTop = 0;
+};
+
+document.querySelectorAll('.ni[data-p]').forEach(i => i.addEventListener('click', () => nav(i.dataset.p)));
+
+// ============ MODALES ============
+window.openM = (id) => document.getElementById(id)?.classList.add('open');
+window.closeM = (id) => document.getElementById(id)?.classList.remove('open');
+document.querySelectorAll('.mo').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+
+// ============ TOAST ============
+window.toast = function(msg) {
+  const s = document.getElementById('ts');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>${msg}`;
+  s.appendChild(el);
+  setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transition = 'opacity .3s';
+    setTimeout(() => el.remove(), 300);
+  }, 3000);
+};
+
+// ============ LOGOUT ============
+document.getElementById('logoutBtn').onclick = async () => {
+  await signOut(auth);
+  window.location.href = '/login.html';
+};
+
+// ============ RELOJ ============
+function tick() {
+  const n = new Date();
+  document.getElementById('clock').textContent = n.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+setInterval(tick, 1000);
+tick();
+
+const now = new Date();
+const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+document.getElementById('dashDate').textContent = `${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]} ${now.getFullYear()}`;
+document.getElementById('sideDate').textContent = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`;
+</script>
+</body>
+</htmll 

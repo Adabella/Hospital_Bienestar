@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Panel Enfermería — Hospital Bienestar Prime</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#3ddb72;--green-dk:#0f5c2e;
+  --bg:#020d0a;--bg2:#040f0b;--sidebar:#030e08;
+  --glass:rgba(255,255,255,0.04);--glass-h:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.07);--border-g:rgba(61,219,114,0.25);
+  --text:rgba(255,255,255,0.88);--text-dim:rgba(255,255,255,0.42);
+  --sidebar-w:240px;--topbar-h:60px;
+  --yellow:#f0c040;--red:#e05555;--blue:#4ab4e8;--purple:#a78bfa;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;-webkit-tap-highlight-color:transparent}
+::selection{background:rgba(61,219,114,0.25)}
+button,input,select,textarea{font-family:inherit}
+
+/* ── TOPBAR ── */
+.topbar{height:var(--topbar-h);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px 0 0;background:var(--sidebar);border-bottom:1px solid var(--border);z-index:60;position:relative}
+.topbar-left{width:var(--sidebar-w);flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid var(--border);height:100%}
+.tb-logo{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#fff}
+.tb-logo span{color:var(--green)}
+.tb-logo-sub{font-size:6.5px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase}
+.topbar-right{display:flex;align-items:center;gap:16px;flex:1;justify-content:flex-end}
+.user-pill{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:6px 12px 6px 6px}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:rgba(167,139,250,0.15);border:1.5px solid rgba(167,139,250,0.35);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--purple)}
+.user-name{font-size:10px;font-weight:700;color:#fff}
+.user-role{font-size:7.5px;letter-spacing:1px;text-transform:uppercase;color:var(--purple)}
+.sidebar-toggle{display:none;width:36px;height:36px;border-radius:8px;background:var(--glass);border:1px solid var(--border);color:var(--text-dim);cursor:pointer;margin-left:12px;flex-direction:column;justify-content:center;align-items:center;gap:4px}
+.sidebar-toggle span{display:block;width:16px;height:1.5px;background:rgba(255,255,255,0.7)}
+
+/* ── LAYOUT ── */
+.app-body{flex:1;display:flex;overflow:hidden}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;transition:transform .3s ease;z-index:50;scrollbar-width:thin}
+.nav-group{padding:20px 0 8px}
+.nav-group-label{font-size:7px;letter-spacing:2.5px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,0.2);padding:0 20px 10px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 20px;cursor:pointer;font-size:10px;font-weight:600;color:rgba(255,255,255,0.45);border-left:2px solid transparent;transition:all .2s;position:relative}
+.nav-item:hover{color:rgba(255,255,255,0.85);background:var(--glass)}
+.nav-item.active{color:var(--green);border-left-color:var(--green);background:rgba(61,219,114,0.06)}
+.nav-item svg{width:16px;height:16px;stroke-width:1.8;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:7px;font-weight:700;padding:2px 7px;border-radius:10px}
+.sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border)}
+.logout-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;background:none;border:1px solid var(--border);color:var(--text-dim);cursor:pointer;font-size:10px;font-weight:600;transition:all .2s}
+.logout-btn:hover{background:rgba(219,61,61,0.1);border-color:rgba(219,61,61,0.3);color:#db3d3d}
+.logout-btn svg{width:15px;height:15px;stroke-width:1.8}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;background:var(--bg);scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.06) transparent}
+.panel{display:none;padding:28px 36px 60px}
+.panel.active{display:block}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,3vw,42px);line-height:.95;color:#fff}
+.page-title span{color:var(--green)}
+.page-sub{font-size:10.5px;color:var(--text-dim);margin-top:6px}
+.page-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:5px;border:none;cursor:pointer;font-size:8.5px;letter-spacing:2px;font-weight:700;text-transform:uppercase;transition:all .2s}
+.btn-green{background:var(--green);color:#020d0a;box-shadow:0 0 20px rgba(61,219,114,0.2)}
+.btn-green:hover{background:#5df08d;transform:translateY(-1px)}
+.btn-ghost{background:var(--glass);border:1px solid var(--border);color:rgba(255,255,255,0.65)}
+.btn-ghost:hover{background:var(--glass-h);color:#fff}
+.btn svg{width:14px;height:14px;stroke-width:2}
+
+/* ── METRICS ── */
+.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.metric-card{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:20px;position:relative;overflow:hidden;transition:border-color .25s,transform .2s}
+.metric-card:hover{border-color:var(--border-g);transform:translateY(-2px)}
+.metric-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--green);opacity:0;transition:opacity .3s}
+.metric-card:hover::after,.metric-card.active-top::after{opacity:1}
+.metric-card.red-top::after{background:var(--red)}
+.metric-card.yellow-top::after{background:var(--yellow)}
+.metric-card.blue-top::after{background:var(--blue)}
+.metric-num{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:1;color:var(--green);display:block}
+.metric-num.red{color:var(--red)}
+.metric-num.yellow{color:var(--yellow)}
+.metric-num.blue{color:var(--blue)}
+.metric-label{font-size:8px;letter-spacing:2px;font-weight:600;text-transform:uppercase;color:var(--text-dim);margin-top:4px}
+
+/* ── TURNO BANNER ── */
+.turno-banner{display:flex;align-items:center;justify-content:space-between;background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.18);border-radius:8px;padding:14px 20px;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.turno-dot{width:9px;height:9px;border-radius:50%;background:var(--purple);box-shadow:0 0 8px rgba(167,139,250,0.6);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.turno-label{font-size:8.5px;letter-spacing:2px;font-weight:700;text-transform:uppercase;color:var(--purple)}
+.turno-hora{font-size:10.5px;color:var(--text-dim);margin-top:1px}
+.turno-info{display:flex;align-items:center;gap:12px}
+
+/* ── TABLA ── */
+.table-card{background:var(--glass);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:20px}
+.table-card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.table-card-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.5px;color:#fff}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead th{text-align:left;padding:10px 16px;font-size:7.5px;letter-spacing:2px;font-weight:700;text-transform:uppercase;color:var(--text-dim);border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr{border-bottom:1px solid rgba(255,255,255,0.03);transition:background .15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--glass)}
+tbody td{padding:11px 16px;color:rgba(255,255,255,0.72);vertical-align:middle}
+tbody td:first-child{font-weight:600;color:#fff}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:7.5px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase}
+.badge-green{background:rgba(61,219,114,0.12);color:var(--green);border:1px solid rgba(61,219,114,0.25)}
+.badge-yellow{background:rgba(240,192,64,0.12);color:var(--yellow);border:1px solid rgba(240,192,64,0.25)}
+.badge-red{background:rgba(224,85,85,0.12);color:#e05555;border:1px solid rgba(224,85,85,0.25)}
+.badge-blue{background:rgba(74,180,232,0.12);color:var(--blue);border:1px solid rgba(74,180,232,0.25)}
+.badge-purple{background:rgba(167,139,250,0.12);color:var(--purple);border:1px solid rgba(167,139,250,0.25)}
+.row-actions{display:flex;gap:5px}
+.row-btn{width:28px;height:28px;border-radius:5px;background:var(--glass);border:1px solid var(--border);color:rgba(255,255,255,0.45);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s}
+.row-btn:hover{background:var(--glass-h);color:#fff;border-color:rgba(255,255,255,0.18)}
+.row-btn.success:hover{background:rgba(61,219,114,.12);color:var(--green);border-color:var(--border-g)}
+.row-btn.danger:hover{background:rgba(219,61,61,.12);color:#e05252;border-color:rgba(219,61,61,.3)}
+.row-btn svg{width:12px;height:12px;stroke-width:2}
+
+/* ── SEARCH ── */
+.search-bar{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:9px 14px;transition:border-color .2s}
+.search-bar:focus-within{border-color:var(--border-g)}
+.search-bar svg{width:14px;height:14px;stroke:var(--text-dim);flex-shrink:0;stroke-width:2}
+.search-bar input{background:none;border:none;outline:none;font-size:11px;color:var(--text);width:180px}
+.search-bar input::placeholder{color:rgba(255,255,255,0.2)}
+
+/* ── SIGNOS VITALES CARDS ── */
+.sv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:24px}
+.sv-card{background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:18px;position:relative;overflow:hidden;transition:border-color .2s,transform .15s;cursor:pointer}
+.sv-card:hover{border-color:var(--border-g);transform:translateY(-2px)}
+.sv-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--green)}
+.sv-card.alerta::before{background:var(--red)}
+.sv-card.precaucion::before{background:var(--yellow)}
+.sv-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.sv-paciente{font-family:'Bebas Neue',sans-serif;font-size:18px;color:#fff;line-height:1}
+.sv-hora{font-size:8.5px;color:var(--text-dim)}
+.sv-vitales{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sv-vital{background:rgba(255,255,255,0.03);border-radius:6px;padding:10px}
+.sv-vital-num{font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff;line-height:1}
+.sv-vital-num.ok{color:var(--green)}
+.sv-vital-num.warn{color:var(--yellow)}
+.sv-vital-num.alert{color:var(--red)}
+.sv-vital-label{font-size:7.5px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase;color:var(--text-dim);margin-top:3px}
+.sv-pie{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+.sv-hab{font-size:9px;color:var(--text-dim)}
+.sv-actions{display:flex;gap:5px}
+
+/* ── RONDAS ── */
+.ronda-card{background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:18px;margin-bottom:12px;display:flex;align-items:center;gap:16px;transition:border-color .2s}
+.ronda-card:hover{border-color:var(--border-g)}
+.ronda-check{width:36px;height:36px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .2s}
+.ronda-check.done{background:var(--green);border-color:var(--green)}
+.ronda-check svg{width:16px;height:16px;stroke-width:2.5;opacity:0;transition:opacity .2s}
+.ronda-check.done svg{opacity:1;stroke:#020d0a}
+.ronda-info{flex:1}
+.ronda-pac{font-size:12px;font-weight:700;color:#fff}
+.ronda-hab{font-size:9px;color:var(--text-dim)}
+.ronda-hora{font-size:9px;font-weight:700;color:var(--green);margin-top:2px}
+.ronda-prioridad{padding:3px 10px;border-radius:20px;font-size:7.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;flex-shrink:0}
+
+/* ── MEDICAMENTOS ── */
+.med-timeline{position:relative;padding-left:20px}
+.med-timeline::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:1px;background:var(--border)}
+.med-item{position:relative;margin-bottom:16px}
+.med-item::before{content:'';position:absolute;left:-24px;top:8px;width:8px;height:8px;border-radius:50%;background:var(--border);border:1.5px solid var(--border)}
+.med-item.pendiente::before{background:var(--yellow);border-color:var(--yellow);box-shadow:0 0 6px rgba(240,192,64,0.5)}
+.med-item.administrado::before{background:var(--green);border-color:var(--green)}
+.med-item.omitido::before{background:var(--red);border-color:var(--red)}
+.med-box{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:14px;transition:border-color .2s}
+.med-item.pendiente .med-box{border-color:rgba(240,192,64,0.2)}
+.med-hora{font-family:'Bebas Neue',sans-serif;font-size:20px;color:#fff;margin-bottom:2px}
+.med-nombre{font-size:12px;font-weight:700;color:#fff}
+.med-dosis{font-size:9.5px;color:var(--text-dim)}
+.med-pac{font-size:9px;color:var(--text-dim);margin-top:4px}
+.med-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)}
+
+/* ── ALERT BANNER ── */
+.alert-banner{display:flex;align-items:center;gap:12px;border-radius:7px;padding:13px 16px;margin-bottom:16px;font-size:10.5px}
+.alert-banner.red{background:rgba(224,85,85,0.09);border:1px solid rgba(224,85,85,0.25);color:#f08080}
+.alert-banner.yellow{background:rgba(240,192,64,0.08);border:1px solid rgba(240,192,64,0.22);color:#e8c048}
+.alert-banner svg{width:16px;height:16px;flex-shrink:0}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.72);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:8px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,0.6);animation:modalIn .25s ease}
+@keyframes modalIn{from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)}}
+.modal-header{padding:22px 24px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.5px;color:#fff}
+.modal-subtitle{font-size:9.5px;color:var(--text-dim);margin-top:2px}
+.modal-close{width:30px;height:30px;border-radius:6px;background:var(--glass);border:1px solid var(--border);color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:16px}
+.modal-close:hover{background:var(--glass-h);color:#fff}
+.modal-body{padding:24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:7px}
+.form-group.full{grid-column:span 2}
+.form-label{font-size:7.5px;letter-spacing:2px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,0.45)}
+.form-input,.form-select,.form-textarea{background:var(--glass);border:1px solid var(--border);border-radius:5px;padding:11px 14px;font-size:11.5px;color:var(--text);outline:none;transition:border-color .2s;-webkit-appearance:none}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--border-g);background:rgba(61,219,114,0.03)}
+.form-select option{background:#040f0b}
+.form-textarea{resize:vertical;min-height:76px}
+/* valor en rango */
+.form-input.ok{border-color:rgba(61,219,114,0.4)}
+.form-input.warn{border-color:rgba(240,192,64,0.5)}
+.form-input.alert-border{border-color:rgba(224,85,85,0.5)}
+
+/* ── RESUMEN SIGNOS (en modal) ── */
+.sv-resumen{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.sv-mini{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:12px;text-align:center}
+.sv-mini-val{font-family:'Bebas Neue',sans-serif;font-size:24px;color:#fff}
+.sv-mini-lbl{font-size:7.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim)}
+
+/* ── EXPEDIENTE HISTORIAL ── */
+.hist-item{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:10px}
+.hist-fecha{font-size:8.5px;color:var(--text-dim);margin-bottom:4px}
+.hist-val{font-size:11px;color:var(--text)}
+
+/* ── TOAST ── */
+.toast-stack{position:fixed;bottom:24px;right:24px;z-index:300;display:flex;flex-direction:column;gap:10px}
+.toast-msg{display:flex;align-items:center;gap:12px;background:rgba(4,15,11,0.97);border:1px solid var(--border-g);border-radius:6px;padding:14px 18px;font-size:11px;color:rgba(255,255,255,0.85);box-shadow:0 8px 32px rgba(0,0,0,0.4);animation:toastIn .3s ease;transition:opacity .3s}
+.toast-msg.err{border-color:rgba(224,85,85,0.4)}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)}}
+.toast-msg .ti{width:16px;height:16px;flex-shrink:0}
+
+/* ── RESPONSIVE ── */
+/* ── TABLET ── */
+@media(max-width:1100px){
+  .metrics-row{grid-template-columns:repeat(2,1fr)}
+  .sv-grid{grid-template-columns:repeat(2,1fr)}
+  thead th{padding:9px 12px}
+  tbody td{padding:10px 12px}
+}
+
+/* ── MOBILE / TABLET ── */
+@media(max-width:768px){
+  :root{--topbar-h:56px}
+
+  .sidebar{
+    position:fixed;top:var(--topbar-h);left:0;bottom:0;
+    transform:translateX(-100%);width:260px;
+    box-shadow:4px 0 24px rgba(0,0,0,0.5);z-index:100;
+  }
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay{
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,0.5);z-index:99;
+  }
+  .sidebar-overlay.show{display:block}
+
+  .sidebar-toggle{display:flex}
+  .topbar-left{width:auto;border-right:none;padding:0 14px}
+  .topbar{padding:0 14px 0 0}
+
+  .panel{padding:16px 14px 80px}
+
+  .metrics-row{grid-template-columns:1fr 1fr;gap:10px}
+  .metric-card{padding:16px 14px}
+  .metric-num{font-size:30px}
+
+  .sv-grid{grid-template-columns:1fr}
+  .sv-resumen{grid-template-columns:1fr 1fr}
+  .sv-vitales{grid-template-columns:1fr 1fr}
+
+  .form-grid{grid-template-columns:1fr}
+  .form-group.full{grid-column:span 1}
+
+  .page-header{flex-direction:column;align-items:flex-start;gap:12px;margin-bottom:18px}
+  .page-actions{width:100%;flex-wrap:wrap}
+  .page-actions .search-bar{flex:1}
+  .page-actions .search-bar input{width:100%}
+  .page-actions .btn{flex:1;justify-content:center}
+
+  .table-wrap{-webkit-overflow-scrolling:touch}
+  table{min-width:520px}
+  .table-card-header{padding:14px;flex-direction:column;align-items:flex-start;gap:8px}
+
+  .modal{max-width:100% !important;border-radius:14px 14px 0 0;position:fixed;bottom:0;left:0;right:0;max-height:92vh}
+  .modal-overlay{align-items:flex-end;padding:0}
+
+  /* Medicamentos timeline */
+  .med-timeline{padding-left:14px}
+  .med-hora{font-size:16px}
+
+  /* Rondas */
+  .ronda-card{gap:10px}
+
+  .user-pill{padding:5px 10px 5px 5px}
+  .user-name{font-size:9px}
+  .btn{padding:10px 14px;font-size:8px;letter-spacing:1.5px}
+
+  /* Turno banner */
+  .turno-banner{flex-direction:column;align-items:flex-start;gap:8px}
+
+  /* Alert banners */
+  .alert-banner{font-size:10px;padding:11px 13px}
+}
+
+/* ── MOBILE PEQUEÑO ── */
+@media(max-width:420px){
+  .metrics-row{grid-template-columns:1fr 1fr;gap:8px}
+  .metric-num{font-size:26px}
+  .metric-label{font-size:7px}
+  .metric-card{padding:12px 10px}
+  .page-title{font-size:24px}
+  .panel{padding:12px 10px 80px}
+  table{min-width:420px}
+  .sv-vitales{grid-template-columns:1fr 1fr}
+  .sv-resumen{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div>
+      <div class="tb-logo">HOSPI<span>TAL</span></div>
+      <div class="tb-logo-sub">Panel Enfermería</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="user-pill">
+      <div class="user-avatar" id="userAvatar">E</div>
+      <div>
+        <div class="user-name" id="userName">Enfermera</div>
+        <div class="user-role">Enfermería</div>
+      </div>
+    </div>
+    <button class="sidebar-toggle" id="sidebarToggle"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<div class="app-body">
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="nav-group">
+      <div class="nav-group-label">Principal</div>
+      <div class="nav-item active" data-panel="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Pacientes</div>
+      <div class="nav-item" data-panel="signos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Signos Vitales
+        <span class="nav-badge" id="navBadgeAlertas" style="display:none">!</span>
+      </div>
+      <div class="nav-item" data-panel="rondas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Rondas
+      </div>
+      <div class="nav-item" data-panel="medicamentos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.5 20H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H20a2 2 0 0 1 2 2v3"/><circle cx="18" cy="18" r="4"/><path d="M18 14v4l2 2"/></svg>
+        Medicamentos
+      </div>
+      <div class="nav-item" data-panel="pacientes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        Lista de Pacientes
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Gestión</div>
+      <div class="nav-item" data-panel="notas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Notas de Enfermería
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <button class="logout-btn" id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar Sesión
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">HOLA, <span id="dashGreet">ENFERMERA</span></div>
+          <div class="page-sub" id="dashDate"></div>
+        </div>
+      </div>
+
+      <div class="turno-banner">
+        <div class="turno-info">
+          <div class="turno-dot"></div>
+          <div>
+            <div class="turno-label" id="turnoLabel">Turno activo</div>
+            <div class="turno-hora" id="turnoHora">—</div>
+          </div>
+        </div>
+        <div style="font-size:9px;color:var(--text-dim)">Área: <strong id="areaLabel" style="color:var(--purple)">—</strong></div>
+      </div>
+
+      <div id="alertasBanner"></div>
+
+      <div class="metrics-row" id="metricsRow"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;flex-wrap:wrap">
+        <div class="table-card">
+          <div class="table-card-header"><span class="table-card-title">PRÓXIMAS RONDAS</span></div>
+          <div id="dashRondasBody" style="padding:12px 16px"></div>
+        </div>
+        <div class="table-card">
+          <div class="table-card-header"><span class="table-card-title">MEDICAMENTOS HOY</span></div>
+          <div id="dashMedBody" style="padding:12px 16px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SIGNOS VITALES ══ -->
+    <div class="panel" id="panel-signos">
+      <div class="page-header">
+        <div>
+          <div class="page-title">SIGNOS <span>VITALES</span></div>
+          <div class="page-sub">Registra y monitorea los signos de cada paciente.</div>
+        </div>
+        <div class="page-actions">
+          <div class="search-bar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchSignos" placeholder="Buscar paciente…">
+          </div>
+          <button class="btn btn-green" id="btnNuevoSigno">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Registrar signos
+          </button>
+        </div>
+      </div>
+
+      <div id="alertasBannerSignos"></div>
+      <div class="sv-grid" id="svGrid"></div>
+
+      <div class="table-card">
+        <div class="table-card-header"><span class="table-card-title">HISTORIAL DE SIGNOS</span></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Paciente</th><th>Presión</th><th>Temp.</th><th>FC</th><th>SpO₂</th><th>FR</th><th>Fecha</th><th>Acciones</th></tr></thead>
+            <tbody id="signosHistBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ RONDAS ══ -->
+    <div class="panel" id="panel-rondas">
+      <div class="page-header">
+        <div>
+          <div class="page-title">RONDAS DE <span>ENFERMERÍA</span></div>
+          <div class="page-sub">Control de visitas programadas por paciente.</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-ghost" id="btnNuevaRonda">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Agregar ronda
+          </button>
+        </div>
+      </div>
+      <div id="rondasContainer"></div>
+    </div>
+
+    <!-- ══ MEDICAMENTOS ══ -->
+    <div class="panel" id="panel-medicamentos">
+      <div class="page-header">
+        <div>
+          <div class="page-title">CONTROL DE <span>MEDICAMENTOS</span></div>
+          <div class="page-sub">Administración y seguimiento de dosis por paciente.</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-green" id="btnNuevoMed">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Agregar medicamento
+          </button>
+        </div>
+      </div>
+      <div id="medTimeline" class="med-timeline"></div>
+    </div>
+
+    <!-- ══ PACIENTES ══ -->
+    <div class="panel" id="panel-pacientes">
+      <div class="page-header">
+        <div>
+          <div class="page-title">LISTA DE <span>PACIENTES</span></div>
+          <div class="page-sub">Consulta el estado y datos básicos de cada paciente.</div>
+        </div>
+        <div class="page-actions">
+          <div class="search-bar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchPac" placeholder="Buscar…">
+          </div>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Paciente</th><th>Habitación</th><th>Diagnóstico</th><th>Alergias</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="pacBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ NOTAS ══ -->
+    <div class="panel" id="panel-notas">
+      <div class="page-header">
+        <div>
+          <div class="page-title">NOTAS DE <span>ENFERMERÍA</span></div>
+          <div class="page-sub">Observaciones clínicas durante el turno.</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-green" id="btnNuevaNota">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nueva nota
+          </button>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Paciente</th><th>Nota</th><th>Turno</th><th>Fecha</th><th>Acciones</th></tr></thead>
+            <tbody id="notasBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══ MODAL: REGISTRAR SIGNOS ═══ -->
+<div class="modal-overlay" id="modalSignos">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">REGISTRAR SIGNOS VITALES</div>
+        <div class="modal-subtitle">Valores fuera de rango se marcan automáticamente</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modalSignos')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Paciente</label>
+          <select class="form-select" id="svPaciente"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Presión sistólica (mmHg)</label>
+          <input class="form-input" type="number" id="svSistolica" placeholder="120" min="60" max="220">
+          <span style="font-size:8px;color:var(--text-dim)">Normal: 90–140</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Presión diastólica (mmHg)</label>
+          <input class="form-input" type="number" id="svDiastolica" placeholder="80" min="40" max="140">
+          <span style="font-size:8px;color:var(--text-dim)">Normal: 60–90</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Temperatura (°C)</label>
+          <input class="form-input" type="number" id="svTemp" placeholder="36.5" step="0.1" min="34" max="42">
+          <span style="font-size:8px;color:var(--text-dim)">Normal: 36.0–37.5</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Frecuencia cardíaca (lpm)</label>
+          <input class="form-input" type="number" id="svFC" placeholder="72" min="30" max="200">
+          <span style="font-size:8px;color:var(--text-dim)">Normal: 60–100</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">SpO₂ — Saturación O₂ (%)</label>
+          <input class="form-input" type="number" id="svSpo2" placeholder="98" min="70" max="100">
+          <span style="font-size:8px;color:var(--text-dim)">Normal: ≥ 95%</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Frecuencia respiratoria (rpm)</label>
+          <input class="form-input" type="number" id="svFR" placeholder="16" min="8" max="40">
+          <span style="font-size:8px;color:var(--text-dim)">Normal: 12–20</span>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Observaciones</label>
+          <textarea class="form-textarea" id="svObs" placeholder="Condición general del paciente, síntomas reportados…"></textarea>
+        </div>
+      </div>
+      <div id="svAlertaPrevia" style="margin-top:12px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalSignos')">Cancelar</button>
+      <button class="btn btn-green" id="saveSignosBtn">Guardar signos</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: DETALLE SIGNOS PACIENTE ═══ -->
+<div class="modal-overlay" id="modalDetalle">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="detalleTitulo">PACIENTE</div>
+        <div class="modal-subtitle" id="detalleSubtitulo">Último registro</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modalDetalle')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="sv-resumen" id="detalleResumen"></div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--text-dim);margin-bottom:12px;letter-spacing:1px">HISTORIAL RECIENTE</div>
+      <div id="detalleHistorial"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: MEDICAMENTO ═══ -->
+<div class="modal-overlay" id="modalMed">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">AGREGAR MEDICAMENTO</div>
+      <button class="modal-close" onclick="closeModal('modalMed')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Paciente</label>
+          <select class="form-select" id="medPaciente"></select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Medicamento</label>
+          <input class="form-input" type="text" id="medNombre" placeholder="Paracetamol 500 mg">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Dosis</label>
+          <input class="form-input" type="text" id="medDosis" placeholder="1 tableta">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vía</label>
+          <select class="form-select" id="medVia">
+            <option>Oral</option><option>IV</option><option>IM</option><option>Tópica</option><option>Sublingual</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hora programada</label>
+          <input class="form-input" type="time" id="medHora">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Frecuencia</label>
+          <select class="form-select" id="medFrec">
+            <option>Única vez</option><option>Cada 6 h</option><option>Cada 8 h</option><option>Cada 12 h</option><option>Cada 24 h</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Indicaciones</label>
+          <textarea class="form-textarea" id="medInd" placeholder="Diluir en 100 ml SF, pasar en 30 min…" style="min-height:60px"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalMed')">Cancelar</button>
+      <button class="btn btn-green" id="saveMedBtn">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: NUEVA RONDA ═══ -->
+<div class="modal-overlay" id="modalRonda">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">AGREGAR RONDA</div>
+      <button class="modal-close" onclick="closeModal('modalRonda')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Paciente</label>
+          <select class="form-select" id="rondaPaciente"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hora programada</label>
+          <input class="form-input" type="time" id="rondaHora">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prioridad</label>
+          <select class="form-select" id="rondaPrioridad">
+            <option value="normal">Normal</option>
+            <option value="prioritario">Prioritario</option>
+            <option value="urgente">Urgente</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Habitación / Área</label>
+          <input class="form-input" type="text" id="rondaHab" placeholder="Hab. 102 — Piso 1">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Indicaciones de ronda</label>
+          <textarea class="form-textarea" id="rondaInd" placeholder="Verificar vía IV, medir glucosa, cambio de apósito…" style="min-height:60px"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalRonda')">Cancelar</button>
+      <button class="btn btn-green" id="saveRondaBtn">Guardar ronda</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: NOTA ═══ -->
+<div class="modal-overlay" id="modalNota">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">NUEVA NOTA</div>
+      <button class="modal-close" onclick="closeModal('modalNota')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Paciente</label>
+          <select class="form-select" id="notaPaciente"></select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Nota clínica</label>
+          <textarea class="form-textarea" id="notaTexto" style="min-height:110px" placeholder="Paciente refiere dolor, se administró medicamento, se observa mejoría…"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Turno</label>
+          <select class="form-select" id="notaTurno">
+            <option>Matutino</option><option>Vespertino</option><option>Nocturno</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Categoría</label>
+          <select class="form-select" id="notaCat">
+            <option>General</option><option>Medicación</option><option>Procedimiento</option><option>Alerta</option><option>Alta</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modalNota')">Cancelar</button>
+      <button class="btn btn-green" id="saveNotaBtn">Guardar nota</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<!-- ═══════════════════════ FIREBASE LOGIC ═══════════════════════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc,
+  query, where, orderBy, serverTimestamp, limit
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FC = {
+  apiKey:"AIzaSyCtve3i6HRbmigXrRIXNa8A2KmNCItqurw",
+  authDomain:"hospital-bienestar.firebaseapp.com",
+  projectId:"hospital-bienestar",
+  storageBucket:"hospital-bienestar.firebasestorage.app",
+  messagingSenderId:"296686621012",
+  appId:"1:296686621012:web:2664e71671f69ec17278c1"
+};
+const app  = initializeApp(FC);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+let me = null;
+let pacientesCache = [];
+
+// ─────────────────── HELPERS ───────────────────
+function toast(msg, isErr = false) {
+  const stack = document.getElementById('toastStack');
+  const el = document.createElement('div');
+  el.className = 'toast-msg' + (isErr ? ' err' : '');
+  const col = isErr ? '#e05252' : 'var(--green)';
+  const ico = isErr
+    ? `<svg class="ti" viewBox="0 0 24 24" fill="none" stroke="${col}"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`
+    : `<svg class="ti" viewBox="0 0 24 24" fill="none" stroke="${col}"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+  el.innerHTML = ico + msg;
+  stack.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3500);
+}
+
+window.closeModal = id => document.getElementById(id).classList.remove('open');
+
+function navigate(panelId) {
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.nav-item[data-panel="${panelId}"]`)?.classList.add('active');
+  document.getElementById('panel-' + panelId)?.classList.add('active');
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+window.navigate = navigate;
+
+document.querySelectorAll('.nav-item[data-panel]').forEach(i =>
+  i.addEventListener('click', () => navigate(i.dataset.panel))
+);
+document.getElementById('sidebarToggle').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+});
+document.getElementById('sidebarOverlay').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+});
+
+// Fecha y turno
+const DIAS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const now = new Date();
+document.getElementById('dashDate').textContent =
+  `${DIAS[now.getDay()]}, ${now.getDate()} de ${MESES[now.getMonth()]} ${now.getFullYear()}`;
+
+function turnoActual() {
+  const h = now.getHours();
+  if (h >= 7  && h < 15) return { label:'Turno matutino',   rango:'07:00 – 15:00' };
+  if (h >= 15 && h < 23) return { label:'Turno vespertino', rango:'15:00 – 23:00' };
+  return                        { label:'Turno nocturno',   rango:'23:00 – 07:00' };
+}
+const turno = turnoActual();
+document.getElementById('turnoLabel').textContent = turno.label;
+document.getElementById('turnoHora').textContent  = turno.rango;
+
+// ─────────────────── RANGOS NORMALES (detección automática) ───────────────────
+function evaluarSigno(campo, val) {
+  const rangos = {
+    sistolica:  { min:90,  max:140 },
+    diastolica: { min:60,  max:90  },
+    temp:       { min:36.0,max:37.5},
+    fc:         { min:60,  max:100 },
+    spo2:       { min:95,  max:100 },
+    fr:         { min:12,  max:20  }
+  };
+  const r = rangos[campo]; if (!r || val === '' || isNaN(val)) return 'neutral';
+  const v = parseFloat(val);
+  if (v < r.min || v > r.max) return 'alerta';
+  if ((campo === 'sistolica' && (v > 130 || v < 100)) ||
+      (campo === 'temp'      && (v > 37.2 || v < 36.2)) ||
+      (campo === 'spo2'      &&  v < 97)) return 'precaucion';
+  return 'ok';
+}
+
+function colorClass(estado) {
+  return estado === 'alerta' ? 'alert' : estado === 'precaucion' ? 'warn' : 'ok';
+}
+function borderClass(estado) {
+  return estado === 'alerta' ? 'alert-border' : estado === 'precaucion' ? 'warn' : 'ok';
+}
+
+// Input coloring en tiempo real
+['svSistolica','svDiastolica','svTemp','svFC','svSpo2','svFR'].forEach((id, i) => {
+  const keys = ['sistolica','diastolica','temp','fc','spo2','fr'];
+  const inp = document.getElementById(id);
+  inp?.addEventListener('input', () => {
+    const est = evaluarSigno(keys[i], inp.value);
+    inp.className = 'form-input ' + borderClass(est);
+    actualizarAlertaPrevia();
+  });
+});
+
+function actualizarAlertaPrevia() {
+  const campos = [
+    { id:'svSistolica', key:'sistolica', label:'Presión sistólica' },
+    { id:'svDiastolica',key:'diastolica',label:'Presión diastólica' },
+    { id:'svTemp',      key:'temp',      label:'Temperatura' },
+    { id:'svFC',        key:'fc',        label:'Frec. cardíaca' },
+    { id:'svSpo2',      key:'spo2',      label:'SpO₂' },
+    { id:'svFR',        key:'fr',        label:'Frec. respiratoria' }
+  ];
+  const alertas = campos.filter(c => {
+    const v = document.getElementById(c.id)?.value;
+    return v && evaluarSigno(c.key, v) === 'alerta';
+  });
+  const banner = document.getElementById('svAlertaPrevia');
+  banner.innerHTML = alertas.length
+    ? `<div class="alert-banner red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Valores fuera de rango: <strong>${alertas.map(a=>a.label).join(', ')}</strong>. Se notificará al médico tratante.</div>`
+    : '';
+}
+
+// ─────────────────── PACIENTES ───────────────────
+async function loadPacientes() {
+  const snap = await getDocs(query(collection(db,'usuarios'), where('rol','==','paciente')));
+  pacientesCache = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+  poblarSelects();
+
+  document.getElementById('pacBody').innerHTML = pacientesCache.length
+    ? pacientesCache.map(p => `
+        <tr>
+          <td>${p.nombre||''} ${p.apellidos||''}</td>
+          <td>${p.habitacion||'—'}</td>
+          <td>${p.diagnostico||'—'}</td>
+          <td>${(p.alergias||[]).join(', ')||'Ninguna'}</td>
+          <td><span class="badge badge-green">Activo</span></td>
+          <td><div class="row-actions">
+            <button class="row-btn" title="Ver signos" onclick="verSignosPaciente('${p.id}','${p.nombre} ${p.apellidos}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </button>
+            <button class="row-btn" title="Nueva nota" onclick="abrirNotaPaciente('${p.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </button>
+          </div></td>
+        </tr>`)
+      .join('')
+    : `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-dim)">Sin pacientes registrados</td></tr>`;
+
+  // Search
+  document.getElementById('searchPac')?.addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll('#pacBody tr').forEach(tr => {
+      tr.style.display = tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+}
+
+function poblarSelects() {
+  const opts = pacientesCache.map(p =>
+    `<option value="${p.id}">${p.nombre||''} ${p.apellidos||''}</option>`
+  ).join('');
+  ['svPaciente','medPaciente','rondaPaciente','notaPaciente'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.innerHTML = opts;
+  });
+}
+
+// ─────────────────── SIGNOS VITALES ───────────────────
+let signosCache = [];
+
+async function loadSignos() {
+  const snap = await getDocs(query(
+    collection(db,'signosVitales'),
+    where('enfermera','==', me?.uid ?? ''),
+    orderBy('fecha','desc'), limit(60)
+  ));
+  // También traer todos si hay pocos
+  const snapAll = await getDocs(query(
+    collection(db,'signosVitales'), orderBy('fecha','desc'), limit(80)
+  ));
+  signosCache = snapAll.docs.map(d => ({ id:d.id, ...d.data() }));
+
+  // Agrupar último registro por paciente
+  const porPaciente = {};
+  signosCache.forEach(s => {
+    if (!porPaciente[s.pacienteId]) porPaciente[s.pacienteId] = s;
+  });
+
+  let alertasCount = 0;
+  const svCards = Object.values(porPaciente).map(s => {
+    const pac = pacientesCache.find(p => p.id === s.pacienteId);
+    const nombre = pac ? `${pac.nombre} ${pac.apellidos}` : s.pacienteId;
+    const hora = s.fecha?.toDate?.()?.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}) || '—';
+
+    const estSist = evaluarSigno('sistolica', s.sistolica);
+    const estDias = evaluarSigno('diastolica', s.diastolica);
+    const estTemp = evaluarSigno('temp', s.temperatura);
+    const estFC   = evaluarSigno('fc', s.frecuenciaCardiaca);
+    const estSpo2 = evaluarSigno('spo2', s.spo2);
+    const estFR   = evaluarSigno('fr', s.frecuenciaRespiratoria);
+
+    const tieneAlerta = [estSist,estDias,estTemp,estFC,estSpo2,estFR].some(e => e === 'alerta');
+    const tienePrecau = [estSist,estDias,estTemp,estFC,estSpo2,estFR].some(e => e === 'precaucion');
+    if (tieneAlerta) alertasCount++;
+
+    const cardClass = tieneAlerta ? 'alerta' : tienePrecau ? 'precaucion' : '';
+
+    return `
+      <div class="sv-card ${cardClass}" onclick="verSignosPaciente('${s.pacienteId}','${nombre}')">
+        <div class="sv-card-header">
+          <div>
+            <div class="sv-paciente">${nombre}</div>
+            ${tieneAlerta ? '<span class="badge badge-red" style="font-size:7px;margin-top:3px;display:inline-block">⚠ ALERTA</span>' : ''}
+          </div>
+          <div class="sv-hora">${hora}</div>
+        </div>
+        <div class="sv-vitales">
+          <div class="sv-vital">
+            <div class="sv-vital-num ${colorClass(estSist)}">${s.sistolica||'—'}/${s.diastolica||'—'}</div>
+            <div class="sv-vital-label">Presión mmHg</div>
+          </div>
+          <div class="sv-vital">
+            <div class="sv-vital-num ${colorClass(estTemp)}">${s.temperatura||'—'}°</div>
+            <div class="sv-vital-label">Temperatura</div>
+          </div>
+          <div class="sv-vital">
+            <div class="sv-vital-num ${colorClass(estFC)}">${s.frecuenciaCardiaca||'—'}</div>
+            <div class="sv-vital-label">FC lpm</div>
+          </div>
+          <div class="sv-vital">
+            <div class="sv-vital-num ${colorClass(estSpo2)}">${s.spo2||'—'}%</div>
+            <div class="sv-vital-label">SpO₂</div>
+          </div>
+        </div>
+        <div class="sv-pie">
+          <span class="sv-hab">${pac?.habitacion||'Sin hab.'}</span>
+          <div class="sv-actions">
+            <button class="row-btn" title="Nuevo registro" onclick="event.stopPropagation();abrirSignosPaciente('${s.pacienteId}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  document.getElementById('svGrid').innerHTML = svCards.join('') ||
+    `<p style="color:var(--text-dim);font-size:11px;grid-column:1/-1;padding:20px">Sin registros de signos vitales aún. Usa el botón "Registrar signos".</p>`;
+
+  // Badge sidebar
+  const badge = document.getElementById('navBadgeAlertas');
+  badge.textContent = alertasCount;
+  badge.style.display = alertasCount > 0 ? '' : 'none';
+
+  // Alertas banner
+  const alertaHtml = alertasCount > 0
+    ? `<div class="alert-banner red" style="margin-bottom:16px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <strong>${alertasCount} paciente${alertasCount>1?'s':''}</strong> con valores fuera de rango. Revisa y notifica al médico.</div>`
+    : '';
+  document.getElementById('alertasBanner').innerHTML = alertaHtml;
+  document.getElementById('alertasBannerSignos').innerHTML = alertaHtml;
+
+  // Historial tabla
+  document.getElementById('signosHistBody').innerHTML = signosCache.slice(0,30).map(s => {
+    const pac = pacientesCache.find(p => p.id === s.pacienteId);
+    const nombre = pac ? `${pac.nombre} ${pac.apellidos}` : '—';
+    const fecha  = s.fecha?.toDate?.()?.toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) || '—';
+    const alertSist = evaluarSigno('sistolica',s.sistolica) === 'alerta';
+    return `<tr>
+      <td>${nombre}</td>
+      <td style="color:${alertSist?'#e05555':'inherit'}">${s.sistolica||'—'}/${s.diastolica||'—'}</td>
+      <td>${s.temperatura||'—'}°C</td>
+      <td>${s.frecuenciaCardiaca||'—'}</td>
+      <td>${s.spo2||'—'}%</td>
+      <td>${s.frecuenciaRespiratoria||'—'}</td>
+      <td>${fecha}</td>
+      <td><div class="row-actions">
+        <button class="row-btn" title="Ver historial" onclick="verSignosPaciente('${s.pacienteId}','${nombre}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div></td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-dim)">Sin registros</td></tr>`;
+
+  // Search signos
+  document.getElementById('searchSignos')?.addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll('#svGrid .sv-card').forEach(card => {
+      card.style.display = card.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+
+  // Dashboard resumen
+  updateDashboardSignos();
+}
+
+function updateDashboardSignos() {
+  const total = pacientesCache.length;
+  const conRegistro = new Set(signosCache.map(s => s.pacienteId)).size;
+  const alertas = signosCache.filter(s =>
+    evaluarSigno('sistolica',s.sistolica) === 'alerta' ||
+    evaluarSigno('temp',s.temperatura)    === 'alerta' ||
+    evaluarSigno('spo2',s.spo2)           === 'alerta'
+  ).length;
+
+  document.getElementById('metricsRow').innerHTML = `
+    <div class="metric-card active-top"><span class="metric-num">${total}</span><div class="metric-label">Pacientes</div></div>
+    <div class="metric-card active-top"><span class="metric-num">${conRegistro}</span><div class="metric-label">Con signos hoy</div></div>
+    <div class="metric-card red-top"><span class="metric-num red">${alertas}</span><div class="metric-label">Alertas activas</div></div>
+    <div class="metric-card blue-top"><span class="metric-num blue">${medicamentosCache.filter(m=>m.estado==='pendiente').length}</span><div class="metric-label">Medicamentos pendientes</div></div>`;
+}
+
+// Abrir modal signos para un paciente específico
+window.abrirSignosPaciente = (pacienteId) => {
+  document.getElementById('svPaciente').value = pacienteId;
+  document.getElementById('modalSignos').classList.add('open');
+};
+
+// Ver detalle + historial de un paciente
+window.verSignosPaciente = async (pacienteId, nombre) => {
+  document.getElementById('detalleTitulo').textContent = nombre.toUpperCase();
+  document.getElementById('modalDetalle').classList.add('open');
+
+  const snap = await getDocs(query(
+    collection(db,'signosVitales'),
+    where('pacienteId','==',pacienteId),
+    orderBy('fecha','desc'), limit(10)
+  ));
+  const registros = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+  const ultimo    = registros[0];
+
+  if (!ultimo) {
+    document.getElementById('detalleResumen').innerHTML = '<p style="color:var(--text-dim);font-size:11px;grid-column:1/-1">Sin registros</p>';
+    document.getElementById('detalleHistorial').innerHTML = '';
+    document.getElementById('detalleSubtitulo').textContent = 'Sin registros';
+    return;
+  }
+
+  const fechaU = ultimo.fecha?.toDate?.()?.toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) || '—';
+  document.getElementById('detalleSubtitulo').textContent = `Último registro: ${fechaU}`;
+
+  const estSist = evaluarSigno('sistolica', ultimo.sistolica);
+  const estTemp = evaluarSigno('temp', ultimo.temperatura);
+  const estFC   = evaluarSigno('fc', ultimo.frecuenciaCardiaca);
+  const estSpo2 = evaluarSigno('spo2', ultimo.spo2);
+  const estFR   = evaluarSigno('fr', ultimo.frecuenciaRespiratoria);
+
+  document.getElementById('detalleResumen').innerHTML = `
+    <div class="sv-mini"><div class="sv-mini-val" style="color:${estSist==='alerta'?'var(--red)':estSist==='precaucion'?'var(--yellow)':'var(--green)'}">${ultimo.sistolica||'—'}/${ultimo.diastolica||'—'}</div><div class="sv-mini-lbl">Presión</div></div>
+    <div class="sv-mini"><div class="sv-mini-val" style="color:${estTemp==='alerta'?'var(--red)':estTemp==='precaucion'?'var(--yellow)':'var(--green)'}">${ultimo.temperatura||'—'}°C</div><div class="sv-mini-lbl">Temperatura</div></div>
+    <div class="sv-mini"><div class="sv-mini-val" style="color:${estFC==='alerta'?'var(--red)':estFC==='precaucion'?'var(--yellow)':'var(--green)'}">${ultimo.frecuenciaCardiaca||'—'} lpm</div><div class="sv-mini-lbl">Frec. cardíaca</div></div>
+    <div class="sv-mini"><div class="sv-mini-val" style="color:${estSpo2==='alerta'?'var(--red)':estSpo2==='precaucion'?'var(--yellow)':'var(--green)'}">${ultimo.spo2||'—'}%</div><div class="sv-mini-lbl">SpO₂</div></div>
+    <div class="sv-mini"><div class="sv-mini-val" style="color:${estFR==='alerta'?'var(--red)':estFR==='precaucion'?'var(--yellow)':'var(--green)'}">${ultimo.frecuenciaRespiratoria||'—'} rpm</div><div class="sv-mini-lbl">Frec. resp.</div></div>
+    <div class="sv-mini"><div class="sv-mini-val" style="color:var(--text-dim);font-size:13px;margin-top:4px">${ultimo.observaciones||'—'}</div><div class="sv-mini-lbl">Observaciones</div></div>`;
+
+  document.getElementById('detalleHistorial').innerHTML = registros.map(r => {
+    const f = r.fecha?.toDate?.()?.toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) || '—';
+    return `<div class="hist-item">
+      <div class="hist-fecha">${f}</div>
+      <div class="hist-val">P: ${r.sistolica||'—'}/${r.diastolica||'—'} mmHg · T: ${r.temperatura||'—'}°C · FC: ${r.frecuenciaCardiaca||'—'} lpm · SpO₂: ${r.spo2||'—'}% · FR: ${r.frecuenciaRespiratoria||'—'} rpm</div>
+      ${r.observaciones ? `<div style="font-size:9.5px;color:var(--text-dim);margin-top:3px;font-style:italic">"${r.observaciones}"</div>` : ''}
+    </div>`;
+  }).join('');
+};
+
+// Guardar signos
+document.getElementById('saveSignosBtn').addEventListener('click', async () => {
+  const pacId = document.getElementById('svPaciente').value;
+  if (!pacId) { toast('Selecciona un paciente', true); return; }
+
+  const sist  = document.getElementById('svSistolica').value;
+  const dias  = document.getElementById('svDiastolica').value;
+  const temp  = document.getElementById('svTemp').value;
+  const fc    = document.getElementById('svFC').value;
+  const spo2  = document.getElementById('svSpo2').value;
+  const fr    = document.getElementById('svFR').value;
+
+  if (!sist && !temp && !fc) { toast('Ingresa al menos presión, temperatura o FC', true); return; }
+
+  const hayAlerta = [
+    evaluarSigno('sistolica',sist), evaluarSigno('temp',temp),
+    evaluarSigno('fc',fc), evaluarSigno('spo2',spo2)
+  ].some(e => e === 'alerta');
+
+  await addDoc(collection(db,'signosVitales'), {
+    pacienteId: pacId,
+    enfermera:  me.uid,
+    sistolica:   sist   ? parseFloat(sist)  : null,
+    diastolica:  dias   ? parseFloat(dias)  : null,
+    temperatura: temp   ? parseFloat(temp)  : null,
+    frecuenciaCardiaca:     fc   ? parseInt(fc)     : null,
+    spo2:        spo2   ? parseInt(spo2)    : null,
+    frecuenciaRespiratoria: fr   ? parseInt(fr)     : null,
+    observaciones: document.getElementById('svObs').value,
+    alerta:      hayAlerta,
+    turno:       turno.label,
+    fecha:       serverTimestamp()
+  });
+
+  // Limpiar formulario
+  ['svSistolica','svDiastolica','svTemp','svFC','svSpo2','svFR','svObs'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.className = 'form-input'; }
+  });
+  document.getElementById('svAlertaPrevia').innerHTML = '';
+  closeModal('modalSignos');
+  toast(hayAlerta ? '⚠ Signos registrados con alerta — notifica al médico' : 'Signos vitales registrados');
+  loadSignos();
+});
+
+// ─────────────────── MEDICAMENTOS ───────────────────
+let medicamentosCache = [];
+
+async function loadMedicamentos() {
+  const snap = await getDocs(query(
+    collection(db,'medicamentosEnfermeria'),
+    orderBy('horaNum','asc')
+  ));
+  medicamentosCache = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+
+  const priorBadge = { pendiente:'badge-yellow', administrado:'badge-green', omitido:'badge-red' };
+  document.getElementById('medTimeline').innerHTML = medicamentosCache.length
+    ? medicamentosCache.map(m => {
+        const pac = pacientesCache.find(p => p.id === m.pacienteId);
+        const nombre = pac ? `${pac.nombre} ${pac.apellidos}` : '—';
+        return `
+          <div class="med-item ${m.estado||'pendiente'}" id="med-${m.id}">
+            <div class="med-box">
+              <div class="med-hora">${m.hora||'—'}</div>
+              <div class="med-nombre">${m.medicamento||'—'}</div>
+              <div class="med-dosis">${m.dosis||''} · Vía ${m.via||'oral'} · ${m.frecuencia||''}</div>
+              <div class="med-pac">Paciente: ${nombre}</div>
+              ${m.indicaciones ? `<div class="med-dosis" style="margin-top:4px;font-style:italic">${m.indicaciones}</div>` : ''}
+              <div class="med-footer">
+                <span class="badge ${priorBadge[m.estado]||'badge-yellow'}">${m.estado||'pendiente'}</span>
+                <div style="display:flex;gap:6px">
+                  ${m.estado !== 'administrado' ? `
+                    <button class="row-btn success" title="Marcar administrado" onclick="cambiarEstadoMed('${m.id}','administrado')">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+                    </button>
+                    <button class="row-btn danger" title="Marcar omitido" onclick="cambiarEstadoMed('${m.id}','omitido')">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                    </button>` : ''}
+                </div>
+              </div>
+            </div>
+          </div>`;
+      }).join('')
+    : '<p style="color:var(--text-dim);font-size:11px;text-align:center;padding:40px">Sin medicamentos programados</p>';
+
+  // Dashboard top-3
+  const pendientes = medicamentosCache.filter(m => m.estado === 'pendiente').slice(0,3);
+  document.getElementById('dashMedBody').innerHTML = pendientes.length
+    ? pendientes.map(m => {
+        const pac = pacientesCache.find(p => p.id === m.pacienteId);
+        return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:11px">
+          <div><div style="font-weight:600;color:#fff">${m.medicamento}</div><div style="font-size:9px;color:var(--text-dim)">${pac?`${pac.nombre} ${pac.apellidos}`:'—'}</div></div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--yellow)">${m.hora||'—'}</div>
+        </div>`;
+      }).join('')
+    : '<p style="font-size:11px;color:var(--green);padding:8px 0">✓ Sin pendientes</p>';
+}
+
+window.cambiarEstadoMed = async (medId, estado) => {
+  await updateDoc(doc(db,'medicamentosEnfermeria',medId), { estado, actualizadoEn: serverTimestamp() });
+  toast(estado === 'administrado' ? 'Medicamento administrado ✓' : 'Marcado como omitido');
+  loadMedicamentos();
+};
+
+document.getElementById('btnNuevoMed').addEventListener('click', () =>
+  document.getElementById('modalMed').classList.add('open')
+);
+document.getElementById('saveMedBtn').addEventListener('click', async () => {
+  const pacId = document.getElementById('medPaciente').value;
+  const nom   = document.getElementById('medNombre').value.trim();
+  const hora  = document.getElementById('medHora').value;
+  if (!pacId || !nom || !hora) { toast('Completa paciente, medicamento y hora', true); return; }
+  const [h, m] = hora.split(':').map(Number);
+  await addDoc(collection(db,'medicamentosEnfermeria'), {
+    pacienteId: pacId, enfermeraId: me.uid,
+    medicamento: nom,
+    dosis:  document.getElementById('medDosis').value,
+    via:    document.getElementById('medVia').value,
+    hora,   horaNum: h * 60 + m,
+    frecuencia:   document.getElementById('medFrec').value,
+    indicaciones: document.getElementById('medInd').value,
+    estado: 'pendiente',
+    turno:  turno.label,
+    creadoEn: serverTimestamp()
+  });
+  closeModal('modalMed'); toast('Medicamento programado');
+  loadMedicamentos();
+});
+
+// ─────────────────── RONDAS ───────────────────
+let rondasCache = [];
+
+async function loadRondas() {
+  const snap = await getDocs(query(
+    collection(db,'rondasEnfermeria'),
+    where('enfermeraId','==', me.uid),
+    orderBy('horaNum','asc')
+  ));
+  rondasCache = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+
+  const priorBg  = { urgente:'badge-red', prioritario:'badge-yellow', normal:'badge-green' };
+  document.getElementById('rondasContainer').innerHTML = rondasCache.length
+    ? rondasCache.map(r => {
+        const pac = pacientesCache.find(p => p.id === r.pacienteId);
+        const nombre = pac ? `${pac.nombre} ${pac.apellidos}` : '—';
+        return `
+          <div class="ronda-card" id="ronda-${r.id}">
+            <div class="ronda-check ${r.completada?'done':''}" onclick="toggleRonda('${r.id}',${!r.completada})">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="ronda-info">
+              <div class="ronda-pac">${nombre}</div>
+              <div class="ronda-hab">${r.habitacion||'—'} ${r.indicaciones ? '· '+r.indicaciones : ''}</div>
+              <div class="ronda-hora">${r.hora||'—'}</div>
+            </div>
+            <span class="badge ${priorBg[r.prioridad]||'badge-green'} ronda-prioridad">${r.prioridad||'normal'}</span>
+          </div>`;
+      }).join('')
+    : '<p style="color:var(--text-dim);font-size:11px;text-align:center;padding:40px">Sin rondas programadas para este turno</p>';
+
+  // Dashboard top-4
+  const proximas = rondasCache.filter(r => !r.completada).slice(0,4);
+  document.getElementById('dashRondasBody').innerHTML = proximas.length
+    ? proximas.map(r => {
+        const pac = pacientesCache.find(p => p.id === r.pacienteId);
+        const priorCol = r.prioridad === 'urgente' ? 'var(--red)' : r.prioridad === 'prioritario' ? 'var(--yellow)' : 'var(--green)';
+        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div style="width:8px;height:8px;border-radius:50%;background:${priorCol};flex-shrink:0"></div>
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:600;color:#fff">${pac?`${pac.nombre} ${pac.apellidos}`:'—'}</div>
+            <div style="font-size:8.5px;color:var(--text-dim)">${r.habitacion||'—'}</div>
+          </div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--green)">${r.hora||'—'}</div>
+        </div>`;
+      }).join('')
+    : '<p style="font-size:11px;color:var(--green);padding:8px 0">✓ Rondas al día</p>';
+}
+
+window.toggleRonda = async (rondaId, completada) => {
+  await updateDoc(doc(db,'rondasEnfermeria',rondaId), {
+    completada,
+    completadaEn: completada ? serverTimestamp() : null
+  });
+  toast(completada ? 'Ronda completada ✓' : 'Ronda marcada como pendiente');
+  loadRondas();
+};
+
+document.getElementById('btnNuevaRonda').addEventListener('click', () =>
+  document.getElementById('modalRonda').classList.add('open')
+);
+document.getElementById('saveRondaBtn').addEventListener('click', async () => {
+  const pacId = document.getElementById('rondaPaciente').value;
+  const hora  = document.getElementById('rondaHora').value;
+  if (!pacId || !hora) { toast('Selecciona paciente y hora', true); return; }
+  const [h, m] = hora.split(':').map(Number);
+  await addDoc(collection(db,'rondasEnfermeria'), {
+    pacienteId:  pacId,
+    enfermeraId: me.uid,
+    hora,        horaNum: h * 60 + m,
+    habitacion:  document.getElementById('rondaHab').value,
+    prioridad:   document.getElementById('rondaPrioridad').value,
+    indicaciones:document.getElementById('rondaInd').value,
+    completada:  false,
+    turno:       turno.label,
+    creadoEn:    serverTimestamp()
+  });
+  closeModal('modalRonda'); toast('Ronda agregada');
+  loadRondas();
+});
+
+// ─────────────────── NOTAS ───────────────────
+async function loadNotas() {
+  const snap = await getDocs(query(
+    collection(db,'notasEnfermeria'),
+    where('enfermeraId','==', me.uid),
+    orderBy('creadoEn','desc'), limit(40)
+  ));
+  const catBadge = {
+    General:'badge-blue', Medicación:'badge-yellow', Procedimiento:'badge-purple',
+    Alerta:'badge-red', Alta:'badge-green'
+  };
+  document.getElementById('notasBody').innerHTML = snap.empty
+    ? `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-dim)">Sin notas registradas</td></tr>`
+    : snap.docs.map(d => {
+        const n = d.data();
+        const pac = pacientesCache.find(p => p.id === n.pacienteId);
+        const nombre = pac ? `${pac.nombre} ${pac.apellidos}` : '—';
+        const fecha  = n.creadoEn?.toDate?.()?.toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) || '—';
+        return `<tr>
+          <td>${nombre}</td>
+          <td style="max-width:280px;white-space:normal">${n.nota||'—'}</td>
+          <td><span class="badge badge-purple">${n.turno||'—'}</span></td>
+          <td>${fecha}</td>
+          <td><span class="badge ${catBadge[n.categoria]||'badge-blue'}">${n.categoria||'—'}</span></td>
+        </tr>`;
+      }).join('');
+}
+
+window.abrirNotaPaciente = (pacienteId) => {
+  document.getElementById('notaPaciente').value = pacienteId;
+  document.getElementById('modalNota').classList.add('open');
+};
+
+document.getElementById('btnNuevaNota').addEventListener('click', () =>
+  document.getElementById('modalNota').classList.add('open')
+);
+document.getElementById('saveNotaBtn').addEventListener('click', async () => {
+  const pacId = document.getElementById('notaPaciente').value;
+  const nota  = document.getElementById('notaTexto').value.trim();
+  if (!pacId || !nota) { toast('Completa paciente y nota', true); return; }
+  await addDoc(collection(db,'notasEnfermeria'), {
+    pacienteId:  pacId,
+    enfermeraId: me.uid,
+    nota,
+    turno:     document.getElementById('notaTurno').value,
+    categoria: document.getElementById('notaCat').value,
+    creadoEn:  serverTimestamp()
+  });
+  closeModal('modalNota'); toast('Nota guardada');
+  loadNotas();
+});
+
+// ─────────────────── MODAL SIGNOS desde pacientes panel ───────────────────
+window.verSignosPacienteFromPac = (id, nombre) => verSignosPaciente(id, nombre);
+
+// ─────────────────── AUTH ───────────────────
+document.getElementById('btnNuevoSigno').addEventListener('click', () =>
+  document.getElementById('modalSignos').classList.add('open')
+);
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await signOut(auth); window.location.href = 'login.html';
+});
+
+async function resolveUser(uid) {
+  // 1. Por ID de documento en 'usuarios'
+  const snap1 = await getDoc(doc(db, 'usuarios', uid));
+  if (snap1.exists()) return { uid, ...snap1.data() };
+  // 2. Por ID de documento en 'enfermera'
+  const snap2 = await getDoc(doc(db, 'enfermera', uid));
+  if (snap2.exists()) return { uid, rol: 'enfermera', ...snap2.data() };
+  // 3. Por campo uid dentro de 'enfermera' (documento con ID fijo)
+  try {
+    const q = query(collection(db, 'enfermera'), where('uid', '==', uid));
+    const qs = await getDocs(q);
+    if (!qs.empty) return { uid, rol: 'enfermera', ...qs.docs[0].data() };
+  } catch(_) {}
+  return null;
+}
+
+async function init(user) {
+  const userData = await resolveUser(user.uid);
+  if (!userData || userData.rol !== 'enfermera') {
+    console.warn('Acceso denegado. Rol encontrado:', userData?.rol, '| Buscado: enfermera');
+    window.location.href = 'login.html'; return;
+  }
+  me = userData;
+
+  document.getElementById('userAvatar').textContent = (me.nombre||'E')[0].toUpperCase();
+  document.getElementById('userName').textContent   = me.nombre || 'Enfermera';
+  document.getElementById('dashGreet').textContent  = (me.nombre||'ENFERMERA').toUpperCase();
+  document.getElementById('areaLabel').textContent  = me.area || 'General';
+
+  await loadPacientes();
+  await loadSignos();
+  await loadMedicamentos();
+  await loadRondas();
+  await loadNotas();
+}
+
+onAuthStateChanged(auth, user => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  init(user);
+});
+</script>
+</body>
+</html>

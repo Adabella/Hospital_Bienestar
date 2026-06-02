@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Panel Médico — Hospital Bienestar Prime</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--green:#3ddb72;--green-mid:#27ae60;--green-dk:#0f5c2e;--bg:#020d0a;--bg2:#040f0b;--sidebar:#030e08;--glass:rgba(255,255,255,0.04);--glass-h:rgba(255,255,255,0.07);--border:rgba(255,255,255,0.07);--border-g:rgba(61,219,114,0.25);--text:rgba(255,255,255,0.88);--text-dim:rgba(255,255,255,0.42);--sidebar-w:240px;--topbar-h:60px}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;-webkit-tap-highlight-color:transparent}
+::selection{background:rgba(61,219,114,0.25)}
+button,input,select,textarea{font-family:inherit}
+.topbar{height:var(--topbar-h);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px 0 0;background:var(--sidebar);border-bottom:1px solid var(--border);z-index:60;position:relative}
+.topbar-left{width:var(--sidebar-w);flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid var(--border);height:100%}
+.tb-logo{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#fff}
+.tb-logo span{color:var(--green)}
+.tb-logo-sub{font-size:6.5px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase}
+.topbar-right{display:flex;align-items:center;gap:16px;flex:1;justify-content:flex-end}
+.user-pill{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:6px 12px 6px 6px}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:rgba(61,219,114,0.15);border:1.5px solid var(--border-g);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--green)}
+.user-name{font-size:10px;font-weight:700;color:#fff}
+.user-role{font-size:7.5px;letter-spacing:1px;text-transform:uppercase;color:var(--green)}
+.sidebar-toggle{display:none;width:36px;height:36px;border-radius:8px;background:var(--glass);border:1px solid var(--border);color:var(--text-dim);cursor:pointer;margin-left:12px;flex-direction:column;justify-content:center;align-items:center;gap:4px}
+.sidebar-toggle span{display:block;width:16px;height:1.5px;background:rgba(255,255,255,0.7)}
+.app-body{flex:1;display:flex;overflow:hidden}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;transition:transform .3s ease;z-index:50}
+.nav-group{padding:20px 0 8px}
+.nav-group-label{font-size:7px;letter-spacing:2.5px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,0.2);padding:0 20px 10px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 20px;cursor:pointer;font-size:10px;font-weight:600;color:rgba(255,255,255,0.45);border-left:2px solid transparent;transition:all .2s}
+.nav-item:hover{color:rgba(255,255,255,0.85);background:var(--glass)}
+.nav-item.active{color:var(--green);border-left-color:var(--green);background:rgba(61,219,114,0.06)}
+.nav-item svg{width:16px;height:16px;stroke-width:1.8;flex-shrink:0}
+.sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border)}
+.logout-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;background:none;border:1px solid var(--border);color:var(--text-dim);cursor:pointer;font-size:10px;font-weight:600;transition:all .2s}
+.logout-btn:hover{background:rgba(219,61,61,0.1);border-color:rgba(219,61,61,0.3);color:#db3d3d}
+.logout-btn svg{width:15px;height:15px;stroke-width:1.8}
+.main{flex:1;overflow-y:auto;background:var(--bg);scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.06) transparent}
+.panel{display:none;padding:28px 36px 40px}
+.panel.active{display:block}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,3.5vw,44px);line-height:.95;color:#fff}
+.page-title span{color:var(--green)}
+.page-sub{font-size:10.5px;color:var(--text-dim);margin-top:6px}
+.page-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:5px;border:none;cursor:pointer;font-size:8.5px;letter-spacing:2px;font-weight:700;text-transform:uppercase;transition:all .2s}
+.btn-green{background:var(--green);color:#020d0a;box-shadow:0 0 20px rgba(61,219,114,0.2)}
+.btn-green:hover{background:#5df08d;transform:translateY(-1px)}
+.btn-ghost{background:var(--glass);border:1px solid var(--border);color:rgba(255,255,255,0.65)}
+.btn-ghost:hover{background:var(--glass-h);color:#fff}
+.btn svg{width:14px;height:14px;stroke-width:2}
+.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.metric-card{background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:22px 20px;position:relative;overflow:hidden;transition:border-color .25s,transform .2s}
+.metric-card:hover{border-color:var(--border-g);transform:translateY(-2px)}
+.metric-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--green);opacity:0;transition:opacity .3s}
+.metric-card:hover::after{opacity:1}
+.metric-num{font-family:'Bebas Neue',sans-serif;font-size:38px;line-height:1;color:var(--green);display:block}
+.metric-label{font-size:8px;letter-spacing:2px;font-weight:600;text-transform:uppercase;color:var(--text-dim);margin-top:4px}
+.table-card{background:var(--glass);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.table-card-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.table-card-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.5px;color:#fff}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead th{text-align:left;padding:11px 16px;font-size:7.5px;letter-spacing:2px;font-weight:700;text-transform:uppercase;color:var(--text-dim);border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr{border-bottom:1px solid rgba(255,255,255,0.03);transition:background .15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--glass)}
+tbody td{padding:12px 16px;color:rgba(255,255,255,0.72);vertical-align:middle}
+tbody td:first-child{font-weight:600;color:#fff}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:7.5px;letter-spacing:1.5px;font-weight:700;text-transform:uppercase}
+.badge-green{background:rgba(61,219,114,0.12);color:var(--green);border:1px solid rgba(61,219,114,0.25)}
+.badge-yellow{background:rgba(219,182,61,0.12);color:#dbb63d;border:1px solid rgba(219,182,61,0.25)}
+.badge-red{background:rgba(219,61,61,0.12);color:#e05252;border:1px solid rgba(219,61,61,0.25)}
+.badge-blue{background:rgba(61,130,219,0.12);color:#5b9cf6;border:1px solid rgba(61,130,219,0.25)}
+.row-actions{display:flex;gap:5px}
+.row-btn{width:28px;height:28px;border-radius:5px;background:var(--glass);border:1px solid var(--border);color:rgba(255,255,255,0.45);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s}
+.row-btn:hover{background:var(--glass-h);color:#fff;border-color:rgba(255,255,255,0.18)}
+.row-btn.success:hover{background:rgba(61,219,114,.12);color:var(--green);border-color:var(--border-g)}
+.row-btn svg{width:12px;height:12px;stroke-width:2}
+.search-bar{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:9px 14px;transition:border-color .2s}
+.search-bar:focus-within{border-color:var(--border-g)}
+.search-bar svg{width:14px;height:14px;stroke:var(--text-dim);flex-shrink:0;stroke-width:2}
+.search-bar input{background:none;border:none;outline:none;font-size:11px;color:var(--text);width:180px}
+.search-bar input::placeholder{color:rgba(255,255,255,0.2)}
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:8px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,0.6);animation:modalIn .25s ease}
+@keyframes modalIn{from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)}}
+.modal-header{padding:22px 24px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.5px;color:#fff}
+.modal-close{width:30px;height:30px;border-radius:6px;background:var(--glass);border:1px solid var(--border);color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:16px}
+.modal-close:hover{background:var(--glass-h);color:#fff}
+.modal-body{padding:24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:7px}
+.form-group.full{grid-column:span 2}
+.form-label{font-size:7.5px;letter-spacing:2px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,0.45)}
+.form-input,.form-select,.form-textarea{background:var(--glass);border:1px solid var(--border);border-radius:5px;padding:11px 14px;font-size:11.5px;color:var(--text);outline:none;transition:border-color .2s,background .2s;-webkit-appearance:none}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--border-g);background:rgba(61,219,114,0.03)}
+.form-textarea{resize:vertical;min-height:90px}
+/* RECETA CARD */
+.receta-card{background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:14px;transition:border-color .2s}
+.receta-card:hover{border-color:var(--border-g)}
+.receta-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.receta-title{font-family:'Bebas Neue',sans-serif;font-size:16px;color:#fff}
+.receta-date{font-size:9px;color:var(--text-dim)}
+.receta-med{font-size:11px;color:var(--text);margin-bottom:4px}
+.receta-dose{font-size:9.5px;color:var(--text-dim)}
+/* TOAST */
+.toast-stack{position:fixed;bottom:24px;right:24px;z-index:300;display:flex;flex-direction:column;gap:10px}
+.toast-msg{display:flex;align-items:center;gap:12px;background:rgba(4,15,11,0.97);border:1px solid var(--border-g);border-radius:6px;padding:14px 18px;font-size:11px;color:rgba(255,255,255,0.85);box-shadow:0 8px 32px rgba(0,0,0,0.4);animation:toastIn .3s ease;transition:opacity .3s}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)}}
+.toast-msg svg{width:16px;height:16px;stroke:var(--green);flex-shrink:0}
+/* EXPEDIENTE DETAIL */
+.exp-section{margin-bottom:24px}
+.exp-section-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.5px;color:var(--green);margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px}
+.exp-row{display:flex;gap:8px;margin-bottom:8px;font-size:11px}
+.exp-label{color:var(--text-dim);min-width:120px;flex-shrink:0}
+.exp-val{color:var(--text);font-weight:600}
+
+/* ── TABLET (1100px) ── */
+@media(max-width:1100px){
+  .metrics-row{grid-template-columns:repeat(2,1fr)}
+  .table-wrap{font-size:10.5px}
+  thead th{padding:9px 12px}
+  tbody td{padding:10px 12px}
+}
+
+/* ── MOBILE / TABLET PEQUEÑO (768px) ── */
+@media(max-width:768px){
+  :root{--topbar-h:56px}
+
+  /* Sidebar se convierte en drawer */
+  .sidebar{
+    position:fixed;top:var(--topbar-h);left:0;bottom:0;
+    transform:translateX(-100%);
+    width:260px;
+    box-shadow:4px 0 24px rgba(0,0,0,0.5);
+    z-index:100;
+  }
+  .sidebar.open{transform:translateX(0)}
+
+  /* Overlay oscuro al abrir sidebar */
+  .sidebar-overlay{
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,0.5);z-index:99;
+  }
+  .sidebar-overlay.show{display:block}
+
+  /* Topbar */
+  .sidebar-toggle{display:flex}
+  .topbar-left{width:auto;border-right:none;padding:0 14px}
+  .topbar{padding:0 14px 0 0}
+
+  /* Panel principal */
+  .panel{padding:16px 14px 80px}
+
+  /* Métricas 2 columnas */
+  .metrics-row{grid-template-columns:1fr 1fr;gap:10px}
+  .metric-card{padding:16px 14px}
+  .metric-num{font-size:30px}
+
+  /* Formularios */
+  .form-grid{grid-template-columns:1fr}
+  .form-group.full{grid-column:span 1}
+
+  /* Page header apilado */
+  .page-header{flex-direction:column;align-items:flex-start;gap:12px;margin-bottom:18px}
+  .page-actions{width:100%;justify-content:flex-start}
+  .page-actions .search-bar input{width:100%}
+  .page-actions .search-bar{flex:1}
+  .page-actions .btn{flex:1;justify-content:center}
+
+  /* Tablas: scroll horizontal */
+  .table-card{border-radius:5px}
+  .table-wrap{-webkit-overflow-scrolling:touch}
+  table{min-width:520px}
+  .table-card-header{padding:14px 14px;flex-direction:column;align-items:flex-start}
+
+  /* Modal */
+  .modal{max-width:100% !important;margin:0;border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;right:0;max-height:92vh}
+  .modal-overlay{align-items:flex-end;padding:0}
+
+  /* Receta cards */
+  .receta-card{padding:14px}
+
+  /* User pill */
+  .user-pill{padding:5px 10px 5px 5px}
+  .user-name{font-size:9px}
+
+  /* Btn texto corto en móvil */
+  .btn{padding:10px 14px;font-size:8px;letter-spacing:1.5px}
+
+  /* Dashboard 2 cols */
+  #panel-dashboard > div:last-child{grid-template-columns:1fr !important}
+}
+
+/* ── MOBILE PEQUEÑO (420px) ── */
+@media(max-width:420px){
+  .metrics-row{grid-template-columns:1fr 1fr;gap:8px}
+  .metric-num{font-size:26px}
+  .metric-label{font-size:7px}
+  .metric-card{padding:14px 12px}
+  .page-title{font-size:26px}
+  .panel{padding:14px 12px 80px}
+  table{min-width:440px}
+  .modal-title{font-size:18px}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <div><div class="tb-logo">HOSPI<span>TAL</span></div><div class="tb-logo-sub">Panel Médico</div></div>
+  </div>
+  <div class="topbar-right">
+    <div class="user-pill">
+      <div class="user-avatar" id="userAvatar">D</div>
+      <div><div class="user-name" id="userName">Doctor</div><div class="user-role" id="userRole">Médico</div></div>
+    </div>
+    <button class="sidebar-toggle" id="sidebarToggle"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<div class="app-body">
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="nav-group">
+      <div class="nav-group-label">Principal</div>
+      <div class="nav-item active" data-panel="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Mi Práctica</div>
+      <div class="nav-item" data-panel="citas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Mis Citas
+      </div>
+      <div class="nav-item" data-panel="pacientes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Mis Pacientes
+      </div>
+      <div class="nav-item" data-panel="recetas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Recetas
+      </div>
+      <div class="nav-item" data-panel="consultas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Consultas
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <button class="logout-btn" id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Cerrar Sesión
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="page-header">
+        <div><div class="page-title">BIENVENIDO, <span id="dashGreet">DOCTOR</span></div><div class="page-sub" id="dashDate"></div></div>
+      </div>
+      <div class="metrics-row" id="metricsRow"></div>
+      <div class="table-card">
+        <div class="table-card-header"><span class="table-card-title">PRÓXIMAS CITAS</span></div>
+        <div class="table-wrap"><table><thead><tr><th>Paciente</th><th>Fecha</th><th>Hora</th><th>Motivo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="dashCitaBody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- CITAS -->
+    <div class="panel" id="panel-citas">
+      <div class="page-header">
+        <div><div class="page-title">MIS <span>CITAS</span></div><div class="page-sub">Gestiona tu agenda médica.</div></div>
+        <div class="page-actions">
+          <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Buscar..." id="searchCitas"></div>
+        </div>
+      </div>
+      <div class="table-card"><div class="table-wrap"><table><thead><tr><th>Paciente</th><th>Fecha</th><th>Hora</th><th>Motivo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="citaBody"></tbody></table></div></div>
+    </div>
+
+    <!-- PACIENTES -->
+    <div class="panel" id="panel-pacientes">
+      <div class="page-header">
+        <div><div class="page-title">MIS <span>PACIENTES</span></div><div class="page-sub">Expedientes de tus pacientes asignados.</div></div>
+      </div>
+      <div class="table-card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>CURP</th><th>Teléfono</th><th>Fecha nac.</th><th>Acciones</th></tr></thead><tbody id="pacBody"></tbody></table></div></div>
+    </div>
+
+    <!-- RECETAS -->
+    <div class="panel" id="panel-recetas">
+      <div class="page-header">
+        <div><div class="page-title">RECETAS <span>MÉDICAS</span></div><div class="page-sub">Emite y gestiona recetas digitales.</div></div>
+        <div class="page-actions"><button class="btn btn-green" id="newRecetaBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nueva Receta</button></div>
+      </div>
+      <div id="recetasList"></div>
+    </div>
+
+    <!-- CONSULTAS -->
+    <div class="panel" id="panel-consultas">
+      <div class="page-header">
+        <div><div class="page-title">REGISTRO DE <span>CONSULTAS</span></div><div class="page-sub">Anota diagnósticos y observaciones clínicas.</div></div>
+        <div class="page-actions"><button class="btn btn-green" id="newConsultaBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nueva Consulta</button></div>
+      </div>
+      <div class="table-card"><div class="table-wrap"><table><thead><tr><th>Paciente</th><th>Fecha</th><th>Diagnóstico</th><th>Tratamiento</th><th>Acciones</th></tr></thead><tbody id="consultaBody"></tbody></table></div></div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL RECETA -->
+<div class="modal-overlay" id="modalReceta">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">NUEVA RECETA</div><button class="modal-close" onclick="closeModal('modalReceta')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">Paciente</label><select class="form-select" id="recetaPaciente"></select></div>
+        <div class="form-group full"><label class="form-label">Medicamento</label><input class="form-input" type="text" id="recetaMed" placeholder="Nombre del medicamento"></div>
+        <div class="form-group"><label class="form-label">Dosis</label><input class="form-input" type="text" id="recetaDosis" placeholder="500 mg"></div>
+        <div class="form-group"><label class="form-label">Frecuencia</label><input class="form-input" type="text" id="recetaFrec" placeholder="Cada 8 horas"></div>
+        <div class="form-group"><label class="form-label">Duración</label><input class="form-input" type="text" id="recetaDur" placeholder="7 días"></div>
+        <div class="form-group"><label class="form-label">Vía de administración</label><select class="form-select" id="recetaVia"><option>Oral</option><option>Intravenosa</option><option>Intramuscular</option><option>Tópica</option><option>Sublingual</option></select></div>
+        <div class="form-group full"><label class="form-label">Indicaciones adicionales</label><textarea class="form-textarea" id="recetaNotas" placeholder="Tomar con alimentos, evitar alcohol…"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modalReceta')">Cancelar</button><button class="btn btn-green" id="saveRecetaBtn">Emitir Receta</button></div>
+  </div>
+</div>
+
+<!-- MODAL CONSULTA -->
+<div class="modal-overlay" id="modalConsulta">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">REGISTRAR CONSULTA</div><button class="modal-close" onclick="closeModal('modalConsulta')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">Paciente</label><select class="form-select" id="consultaPaciente"></select></div>
+        <div class="form-group full"><label class="form-label">Motivo de consulta</label><input class="form-input" type="text" id="consultaMotivo" placeholder="Dolor de cabeza, fiebre…"></div>
+        <div class="form-group full"><label class="form-label">Diagnóstico</label><textarea class="form-textarea" id="consultaDiag" placeholder="Diagnóstico clínico…"></textarea></div>
+        <div class="form-group full"><label class="form-label">Tratamiento indicado</label><textarea class="form-textarea" id="consultaTrat" placeholder="Tratamiento o indicaciones…"></textarea></div>
+        <div class="form-group"><label class="form-label">Próxima cita</label><input class="form-input" type="date" id="consultaProxima"></div>
+        <div class="form-group"><label class="form-label">Urgencia</label><select class="form-select" id="consultaUrgencia"><option>Normal</option><option>Prioritario</option><option>Urgente</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modalConsulta')">Cancelar</button><button class="btn btn-green" id="saveConsultaBtn">Guardar Consulta</button></div>
+  </div>
+</div>
+
+<!-- MODAL EXPEDIENTE -->
+<div class="modal-overlay" id="modalExpediente">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">EXPEDIENTE</div><button class="modal-close" onclick="closeModal('modalExpediente')">✕</button></div>
+    <div class="modal-body" id="expedienteBody"></div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, query, where, orderBy, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const FC = { apiKey:"AIzaSyCtve3i6HRbmigXrRIXNa8A2KmNCItqurw", authDomain:"hospital-bienestar.firebaseapp.com", projectId:"hospital-bienestar", storageBucket:"hospital-bienestar.firebasestorage.app", messagingSenderId:"296686621012", appId:"1:296686621012:web:2664e71671f69ec17278c1" };
+const app = initializeApp(FC);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+let me = null;
+
+function showToast(msg, err=false) {
+  const el = document.createElement('div'); el.className = 'toast-msg';
+  el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="${err?'#e05252':'currentColor'}"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>${msg}`;
+  document.getElementById('toastStack').appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; setTimeout(() => el.remove(), 300); }, 3000);
+}
+window.closeModal = id => document.getElementById(id).classList.remove('open');
+
+function navigate(panelId) {
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.nav-item[data-panel="${panelId}"]`)?.classList.add('active');
+  document.getElementById('panel-' + panelId)?.classList.add('active');
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+document.querySelectorAll('.nav-item[data-panel]').forEach(i => i.addEventListener('click', () => navigate(i.dataset.panel)));
+document.getElementById('sidebarToggle').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+});
+document.getElementById('sidebarOverlay').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+});
+
+const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const now = new Date();
+document.getElementById('dashDate').textContent = `${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]} ${now.getFullYear()}`;
+
+async function loadPatientOptions(selectId) {
+  const snap = await getDocs(query(collection(db, 'usuarios'), where('rol','==','paciente')));
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  sel.innerHTML = snap.docs.map(d => `<option value="${d.id}">${d.data().nombre} ${d.data().apellidos}</option>`).join('');
+}
+
+async function resolveUser(uid) {
+  // ── Estrategia: buscar en todos los lugares posibles ──
+  // El documento del doctor tiene ID fijo "doctor" y campo UID en mayúsculas
+
+  // 1. Colección 'usuarios' por ID de documento
+  try {
+    const s = await getDoc(doc(db, 'usuarios', uid));
+    if (s.exists()) { console.log('✓ Encontrado en usuarios/uid'); return { uid, ...s.data() }; }
+  } catch(e) { console.warn('usuarios/uid:', e.code); }
+
+  // 2. Colección 'doctor' por ID de documento = uid
+  try {
+    const s = await getDoc(doc(db, 'doctor', uid));
+    if (s.exists()) { console.log('✓ Encontrado en doctor/uid'); return { uid, rol:'doctor', ...s.data() }; }
+  } catch(e) { console.warn('doctor/uid:', e.code); }
+
+  // 3. Colección 'doctor' — traer TODOS y buscar manualmente
+  // (evita query para no necesitar índice, y funciona con UID en mayúsculas)
+  try {
+    console.log('🔎 Buscando en colección doctor completa…');
+    const allDocs = await getDocs(collection(db, 'doctor'));
+    console.log('  Documentos encontrados:', allDocs.size);
+    for (const d of allDocs.docs) {
+      const data = d.data();
+      console.log('  Doc:', d.id, '→ uid:', data.uid, '| UID:', data.UID);
+      // Comparar con uid en minúsculas, UID en mayúsculas, o ID del documento
+      if (data.uid === uid || data.UID === uid || d.id === uid) {
+        console.log('  ✓ Match encontrado!');
+        return { uid, rol: data.rol || 'doctor', ...data };
+      }
+    }
+    console.warn('  ✗ Ningún documento coincide con UID:', uid);
+  } catch(e) {
+    console.error('❌ Error de permisos en colección doctor:', e.code, e.message);
+    if (e.code === 'permission-denied') {
+      alert('❌ Error de permisos en Firestore.\n\nDebes actualizar las Reglas de Firestore:\n\nFirebase Console → Firestore → Reglas\n\nY poner:\nallow read, write: if request.auth != null;');
+    }
+  }
+
+  return null;
+}
+
+async function init(user) {
+  console.log('🔍 Buscando usuario con UID:', user.uid);
+  const userData = await resolveUser(user.uid);
+  console.log('📄 Datos encontrados:', userData);
+  if (!userData || userData.rol !== 'doctor') {
+    console.error('❌ Acceso denegado. Rol encontrado:', userData?.rol, '| Necesario: doctor');
+    alert(`Error de acceso.\nRol encontrado: "${userData?.rol || 'ninguno'}"\nUID buscado: ${user.uid}\n\nRevisa la consola para más detalles.`);
+    window.location.href = 'login.html'; return;
+  }
+  me = userData;
+
+  document.getElementById('userAvatar').textContent = (me.nombre||'D')[0].toUpperCase();
+  document.getElementById('userName').textContent = `Dr. ${me.nombre}`;
+  document.getElementById('dashGreet').textContent = (me.nombre||'DOCTOR').toUpperCase();
+
+  // Métricas
+  const [citasSnap, pacSnap, consultasSnap] = await Promise.all([
+    getDocs(query(collection(db,'citas'), where('medicoId','==',me.uid))),
+    getDocs(query(collection(db,'usuarios'), where('rol','==','paciente'))),
+    getDocs(query(collection(db,'consultas'), where('medicoId','==',me.uid)))
+  ]);
+  const hoy = new Date().toISOString().split('T')[0];
+  const citasHoy = citasSnap.docs.filter(d => d.data().fecha === hoy).length;
+  document.getElementById('metricsRow').innerHTML = `
+    <div class="metric-card"><span class="metric-num">${citasSnap.size}</span><div class="metric-label">Total Citas</div></div>
+    <div class="metric-card"><span class="metric-num">${citasHoy}</span><div class="metric-label">Citas Hoy</div></div>
+    <div class="metric-card"><span class="metric-num">${pacSnap.size}</span><div class="metric-label">Pacientes</div></div>
+    <div class="metric-card"><span class="metric-num">${consultasSnap.size}</span><div class="metric-label">Consultas</div></div>`;
+
+  await loadCitas();
+  await loadPacientes();
+  await loadRecetas();
+  await loadConsultas();
+  await loadPatientOptions('recetaPaciente');
+  await loadPatientOptions('consultaPaciente');
+}
+
+async function loadCitas() {
+  const snap = await getDocs(query(collection(db,'citas'), where('medicoId','==',me.uid), orderBy('fecha','desc')));
+  const rows = snap.docs.map(d => {
+    const c = d.data();
+    const estado = c.estado || 'pendiente';
+    const badgeClass = estado === 'completada' ? 'badge-green' : estado === 'cancelada' ? 'badge-red' : 'badge-yellow';
+    return `<tr><td>${c.paciente||'—'}</td><td>${c.fecha||'—'}</td><td>${c.hora||'—'}</td><td>${c.motivo||'—'}</td>
+      <td><span class="badge ${badgeClass}">${estado}</span></td>
+      <td><div class="row-actions">
+        <button class="row-btn success" title="Marcar completada" onclick="completarCita('${d.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></button>
+      </div></td></tr>`;
+  }).join('') || '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-dim)">Sin citas registradas</td></tr>';
+  document.getElementById('citaBody').innerHTML = rows;
+  document.getElementById('dashCitaBody').innerHTML = rows;
+}
+
+async function loadPacientes() {
+  const snap = await getDocs(query(collection(db,'usuarios'), where('rol','==','paciente')));
+  document.getElementById('pacBody').innerHTML = snap.docs.map(d => {
+    const p = d.data();
+    return `<tr><td>${p.nombre||''} ${p.apellidos||''}</td><td>${p.curp||'—'}</td><td>${p.telefono||'—'}</td><td>${p.fechaNacimiento||'—'}</td>
+      <td><div class="row-actions"><button class="row-btn" title="Ver expediente" onclick="verExpediente('${d.id}','${p.nombre||''} ${p.apellidos||''}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button></div></td></tr>`;
+  }).join('') || '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-dim)">Sin pacientes</td></tr>';
+}
+
+async function loadRecetas() {
+  const snap = await getDocs(query(collection(db,'recetas'), where('medicoId','==',me.uid), orderBy('emitidaEn','desc')));
+  if (snap.empty) { document.getElementById('recetasList').innerHTML = '<p style="color:var(--text-dim);font-size:11px;text-align:center;padding:40px">Sin recetas emitidas</p>'; return; }
+  document.getElementById('recetasList').innerHTML = snap.docs.map(d => {
+    const r = d.data();
+    return `<div class="receta-card"><div class="receta-header"><span class="receta-title">${r.medicamento||'—'}</span><span class="receta-date">${r.emitidaEn?.toDate?.()?.toLocaleDateString('es-MX')||'—'}</span></div>
+      <div class="receta-med">Paciente ID: ${r.pacienteId||'—'}</div>
+      <div class="receta-dose">${r.dosis||''} · ${r.frecuencia||''} · ${r.duracion||''} · Vía ${r.via||'oral'}</div>
+      ${r.indicaciones?`<div class="receta-dose" style="margin-top:6px">${r.indicaciones}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+async function loadConsultas() {
+  const snap = await getDocs(query(collection(db,'consultas'), where('medicoId','==',me.uid), orderBy('fecha','desc')));
+  document.getElementById('consultaBody').innerHTML = snap.docs.map(d => {
+    const c = d.data();
+    return `<tr><td>${c.pacienteId||'—'}</td><td>${c.fecha?.toDate?.()?.toLocaleDateString('es-MX')||'—'}</td><td>${c.diagnostico||'—'}</td><td>${c.tratamiento||'—'}</td>
+      <td><div class="row-actions"><button class="row-btn" title="Ver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></td></tr>`;
+  }).join('') || '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-dim)">Sin consultas registradas</td></tr>';
+}
+
+window.completarCita = async (citaId) => {
+  await updateDoc(doc(db,'citas',citaId), { estado:'completada' });
+  showToast('Cita marcada como completada');
+  loadCitas();
+};
+
+window.verExpediente = async (uid, nombre) => {
+  document.getElementById('expedienteBody').innerHTML = '<p style="color:var(--text-dim);text-align:center;padding:30px">Cargando…</p>';
+  document.getElementById('modalExpediente').classList.add('open');
+  const [udoc, expdoc, consultas] = await Promise.all([
+    getDoc(doc(db,'usuarios',uid)),
+    getDoc(doc(db,'pacientes',uid)),
+    getDocs(query(collection(db,'consultas'), where('pacienteId','==',uid), orderBy('fecha','desc'), limit(5)))
+  ]);
+  const u = udoc.data() || {};
+  const exp = expdoc.data() || {};
+  document.getElementById('expedienteBody').innerHTML = `
+    <div class="exp-section">
+      <div class="exp-section-title">Datos personales</div>
+      <div class="exp-row"><span class="exp-label">Nombre:</span><span class="exp-val">${u.nombre||''} ${u.apellidos||''}</span></div>
+      <div class="exp-row"><span class="exp-label">CURP:</span><span class="exp-val">${u.curp||'—'}</span></div>
+      <div class="exp-row"><span class="exp-label">Teléfono:</span><span class="exp-val">${u.telefono||'—'}</span></div>
+      <div class="exp-row"><span class="exp-label">Fecha nac.:</span><span class="exp-val">${u.fechaNacimiento||'—'}</span></div>
+    </div>
+    <div class="exp-section">
+      <div class="exp-section-title">Historial clínico</div>
+      <div class="exp-row"><span class="exp-label">Alergias:</span><span class="exp-val">${(exp.alergias||[]).join(', ')||'Ninguna'}</span></div>
+      <div class="exp-row"><span class="exp-label">Enf. crónicas:</span><span class="exp-val">${(exp.enfermedadesCronicas||[]).join(', ')||'Ninguna'}</span></div>
+      <div class="exp-row"><span class="exp-label">Medicamentos:</span><span class="exp-val">${(exp.medicamentosActuales||[]).join(', ')||'Ninguno'}</span></div>
+    </div>
+    <div class="exp-section">
+      <div class="exp-section-title">Últimas consultas</div>
+      ${consultas.empty ? '<p style="color:var(--text-dim);font-size:11px">Sin consultas previas</p>' :
+        consultas.docs.map(d => { const c=d.data(); return `<div style="background:var(--glass);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:8px"><div style="font-size:9px;color:var(--text-dim);margin-bottom:4px">${c.fecha?.toDate?.()?.toLocaleDateString('es-MX')||'—'}</div><div style="font-size:11px;font-weight:600">${c.diagnostico||'—'}</div><div style="font-size:10px;color:var(--text-dim)">${c.tratamiento||''}</div></div>`; }).join('')}
+    </div>`;
+};
+
+// Guardar receta
+document.getElementById('saveRecetaBtn').addEventListener('click', async () => {
+  const pacienteId = document.getElementById('recetaPaciente').value;
+  const medicamento = document.getElementById('recetaMed').value.trim();
+  if (!pacienteId || !medicamento) { showToast('Completa los campos obligatorios', true); return; }
+  await addDoc(collection(db,'recetas'), {
+    pacienteId, medicoId: me.uid, medicamento,
+    dosis: document.getElementById('recetaDosis').value,
+    frecuencia: document.getElementById('recetaFrec').value,
+    duracion: document.getElementById('recetaDur').value,
+    via: document.getElementById('recetaVia').value,
+    indicaciones: document.getElementById('recetaNotas').value,
+    emitidaEn: serverTimestamp(), activa: true
+  });
+  closeModal('modalReceta'); showToast('Receta emitida');
+  loadRecetas();
+});
+
+// Guardar consulta
+document.getElementById('saveConsultaBtn').addEventListener('click', async () => {
+  const pacienteId = document.getElementById('consultaPaciente').value;
+  const diagnostico = document.getElementById('consultaDiag').value.trim();
+  if (!pacienteId || !diagnostico) { showToast('Completa los campos obligatorios', true); return; }
+  const ref = await addDoc(collection(db,'consultas'), {
+    pacienteId, medicoId: me.uid,
+    motivo: document.getElementById('consultaMotivo').value,
+    diagnostico,
+    tratamiento: document.getElementById('consultaTrat').value,
+    proximaCita: document.getElementById('consultaProxima').value,
+    urgencia: document.getElementById('consultaUrgencia').value,
+    fecha: serverTimestamp()
+  });
+  closeModal('modalConsulta'); showToast('Consulta registrada');
+  loadConsultas();
+});
+
+document.getElementById('newRecetaBtn').addEventListener('click', () => document.getElementById('modalReceta').classList.add('open'));
+document.getElementById('newConsultaBtn').addEventListener('click', () => document.getElementById('modalConsulta').classList.add('open'));
+document.getElementById('logoutBtn').addEventListener('click', async () => { await signOut(auth); window.location.href='login.html'; });
+
+onAuthStateChanged(auth, user => {
+  if (!user) { window.location.href='login.html'; return; }
+  init(user);
+});
+</script>
+</body>
+</html>

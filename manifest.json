@@ -1,0 +1,17 @@
+{
+    "short_name": "Hospital_bienestar",
+    "name": "Hospital Bienestar",
+    "icons": [
+        {
+            "src": "fondo/logo.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ],
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "#F5F5F5",
+    "theme_color": "#F5F5F5",
+    "orientation": "portrait",
+    "categories": ["shopping", "business"]
+}

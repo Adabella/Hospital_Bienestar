@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Servicios — Hospital Bienestar Prime</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   RESET & VARIABLES
+═══════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --green:       #7a3ddb;
+  --green-mid:   #2f1f38;
+  --green-dk:    #2b2831da;
+  --green-glow:  rgba(18, 9, 34, 0.18);
+  --bg:          #1e1925;
+  --bg2:         #040f0b;
+  --bg3:         #0d0612;
+  --glass:       rgba(15, 8, 26, 0.04);
+  --glass-h:     rgba(17, 5, 26, 0.07);
+  --border:      rgba(255,255,255,0.08);
+  --border-g:    rgba(161, 61, 219, 0.28);
+  --text:        rgba(255,255,255,0.88);
+  --text-dim:    rgba(255,255,255,0.44);
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Montserrat', sans-serif;
+  background: var(--bg); color: var(--text);
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+::selection { background: rgba(168, 116, 192, 0.25); }
+
+/* ═══════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px 12px;
+  background: rgba(2,13,10,0.90);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.logo { position: relative; line-height: 1.05; }
+.logo-line { display: block; font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: 3px; color: #fff; }
+.logo-line .g { color: var(--green); }
+.logo-arrow   { color: var(--green); margin-right: 2px; }
+.logo-sub     { display: block; font-size: 7px; letter-spacing: 2px; color: rgba(255,255,255,0.35); text-transform: uppercase; margin-top: 3px; }
+.leaf {
+  position: absolute; top: -8px; left: 150px; width: 58px;
+  animation: leafFloat 3.5s ease-in-out infinite;
+  transform-origin: 50% 95%;
+  filter: drop-shadow(0 3px 10px rgba(162, 52, 184, 0.45));
+}
+@keyframes leafFloat {
+  0%,100% { transform: rotate(-6deg) translateY(0); }
+  50%      { transform: rotate(7deg) translateY(-7px); }
+}
+.nav-links { display: flex; gap: 28px; list-style: none; }
+.nav-links a {
+  text-decoration: none; font-size: 9.5px; letter-spacing: 2px;
+  font-weight: 600; text-transform: uppercase;
+  color: rgba(255,255,255,0.5); transition: color .2s;
+}
+.nav-links a.active { color: var(--green); }
+.nav-links a:hover  { color: #fff; }
+
+.hamburger {
+  display: none; flex-direction: column; justify-content: center;
+  gap: 5px; cursor: pointer;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border); border-radius: 10px; padding: 10px;
+}
+.hamburger span { display: block; width: 20px; height: 1.5px; background: rgba(255,255,255,0.8); transition: all .3s; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4px,4px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4px,-4px); }
+
+.mobile-menu {
+  position: fixed; top: 70px; left: 0; right: 0; z-index: 99;
+  background: rgba(2,13,10,0.97); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  max-height: 0; overflow: hidden;
+  transition: max-height .4s ease, padding .4s ease;
+}
+.mobile-menu.open { max-height: 400px; padding: 20px; }
+.mobile-menu ul { list-style: none; }
+.mobile-menu ul li a {
+  display: block; padding: 14px 0;
+  font-size: 11px; letter-spacing: 2.5px; font-weight: 600; text-transform: uppercase;
+  color: rgba(255,255,255,0.6); text-decoration: none;
+  border-bottom: 1px solid rgba(255,255,255,0.05); transition: color .2s;
+}
+.mobile-menu ul li:last-child a { border-bottom: none; }
+.mobile-menu ul li a.active,
+.mobile-menu ul li a:hover { color: var(--green); }
+
+/* ═══════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════ */
+.hero {
+  position: relative; height: 74vh; min-height: 360px;
+  display: flex; align-items: flex-end; overflow: hidden;
+    margin-top: 70px;
+  padding-top: 10 px;
+}
+.hero-video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover; z-index: 0;
+}
+.hero-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    linear-gradient(to top, rgba(2,13,10,1) 0%, rgba(2,13,10,0.72) 40%, rgba(2,13,10,0.2) 100%),
+    linear-gradient(135deg, rgba(38, 15, 92, 0.5) 0%, transparent 55%);
+}
+.hero-shimmer {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: radial-gradient(ellipse 55% 45% at 12% 72%, rgba(156, 61, 219, 0.11) 0%, transparent 70%);
+  animation: shimPulse 5s ease-in-out infinite alternate;
+}
+@keyframes shimPulse { from{opacity:.5} to{opacity:1} }
+
+.hero-content {
+  position: relative; z-index: 5;
+  padding: 0 48px 56px; width: 100%; margin-top: auto;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 9px; letter-spacing: 4px; font-weight: 700; text-transform: uppercase;
+  color: var(--green); margin-bottom: 14px;
+}
+.hero-eyebrow::before { content:''; display:block; width:28px; height:1px; background:var(--green); }
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(52px, 8vw, 108px);
+  line-height: .92; letter-spacing: -1px; color: #fff;
+  margin-bottom: 16px;
+}
+.hero-title .outline {
+  -webkit-text-stroke: 1.5px rgba(255,255,255,0.2);
+  color: transparent;
+}
+.hero-title .accent { color: var(--green); }
+.hero-desc {
+  font-size: 12px; line-height: 1.8; color: var(--text-dim);
+  max-width: 480px; font-style: italic;
+}
+
+/* ═══════════════════════════════════════════
+   CATEGORY FILTER BAR
+═══════════════════════════════════════════ */
+.filter-bar {
+  position: sticky; top: 70px; z-index: 50;
+  background: rgba(2,13,10,0.95);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 48px;
+  display: flex; gap: 0; overflow-x: auto;
+  scrollbar-width: none;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+.filter-tab {
+  display: flex; align-items: center; gap: 8px;
+  padding: 17px 0; margin-right: 36px;
+  background: none; border: none; cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px; letter-spacing: 2px; font-weight: 700; text-transform: uppercase;
+  color: rgba(255,255,255,0.38);
+  border-bottom: 2px solid transparent;
+  transition: color .25s, border-color .25s;
+  white-space: nowrap; flex-shrink: 0;
+}
+.filter-tab svg { width: 15px; height: 15px; stroke-width: 1.8; }
+.filter-tab.active { color: var(--green); border-bottom-color: var(--green); }
+.filter-tab:hover  { color: rgba(255,255,255,0.75); }
+
+/* ═══════════════════════════════════════════
+   SECTION SHARED
+═══════════════════════════════════════════ */
+.section { padding: 80px 48px; }
+.section-label {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 8.5px; letter-spacing: 4px; font-weight: 700; text-transform: uppercase;
+  color: var(--green); margin-bottom: 12px;
+}
+.section-label::before { content:''; display:block; width:28px; height:1px; background:var(--green); }
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(34px, 5vw, 66px);
+  line-height: .95; color: #fff; margin-bottom: 14px;
+}
+.section-title .dim { color: rgba(255,255,255,0.18); }
+.section-body {
+  font-size: 11.5px; line-height: 1.9; color: var(--text-dim);
+  max-width: 520px; font-style: italic; margin-bottom: 48px;
+}
+
+/* ═══════════════════════════════════════════
+   CATEGORY SECTIONS (shown/hidden)
+═══════════════════════════════════════════ */
+.cat-section { display: none; }
+.cat-section.active { display: block; }
+
+/* ═══════════════════════════════════════════
+   SERVICE CARDS GRID
+═══════════════════════════════════════════ */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 64px;
+}
+
+.svc-card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 32px 28px 28px;
+  position: relative; overflow: hidden;
+  transition: border-color .3s, transform .3s, background .3s;
+  cursor: default;
+}
+.svc-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(to right, var(--green), transparent);
+  opacity: 0; transition: opacity .35s;
+}
+.svc-card:hover { border-color: var(--border-g); background: var(--glass-h); transform: translateY(-5px); }
+.svc-card:hover::before { opacity: 1; }
+
+/* ghost number watermark */
+.svc-card-num {
+  position: absolute; bottom: -10px; right: 16px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 90px; line-height: 1;
+  color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.04);
+  user-select: none; pointer-events: none;
+  transition: -webkit-text-stroke-color .3s;
+}
+.svc-card:hover .svc-card-num { -webkit-text-stroke-color: rgba(135, 61, 219, 0.07); }
+
+/* icon */
+.svc-icon {
+  width: 52px; height: 52px; border-radius: 12px;
+  background: var(--green-glow);
+  border: 1px solid var(--border-g);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+  transition: background .3s, box-shadow .3s;
+}
+.svc-card:hover .svc-icon {
+  background: rgba(135, 61, 219, 0.22);
+  box-shadow: 0 0 20px rgba(171, 124, 185, 0.2);
+}
+.svc-icon svg { width: 24px; height: 24px; stroke: var(--green); stroke-width: 1.7; }
+
+.svc-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; letter-spacing: .5px; color: #fff; margin-bottom: 10px;
+}
+.svc-desc {
+  font-size: 11px; line-height: 1.8; color: var(--text-dim); margin-bottom: 20px;
+}
+.svc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 22px; }
+.svc-tag {
+  font-size: 8px; letter-spacing: 1.5px; font-weight: 600; text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09);
+  padding: 3px 9px; border-radius: 20px;
+}
+.svc-cta {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 8.5px; letter-spacing: 2px; font-weight: 700; text-transform: uppercase;
+  color: var(--green); text-decoration: none;
+  border-bottom: 1px solid rgba(102, 31, 143, 0.3); padding-bottom: 2px;
+  transition: color .2s, border-color .2s;
+}
+.svc-cta:hover { color: #fff; border-color: rgba(255,255,255,0.4); }
+.svc-cta svg   { width: 12px; height: 12px; stroke-width: 2.2; }
+
+/* ═══════════════════════════════════════════
+   FEATURED CARD (wide, 2-col inside)
+═══════════════════════════════════════════ */
+.svc-card.featured {
+  grid-column: span 3;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
+  padding: 40px;
+  background: rgba(61,219,114,0.04);
+  border-color: var(--border-g);
+}
+.svc-card.featured::before { opacity: 1; }
+.svc-card.featured .svc-card-num { font-size: 130px; }
+.featured-left { display: flex; flex-direction: column; }
+.featured-right { display: flex; flex-direction: column; justify-content: flex-end; gap: 12px; }
+.featured-img {
+  width: 100%; aspect-ratio: 16/9; object-fit: cover;
+  border-radius: 4px; filter: saturate(0.5) brightness(0.7);
+  border: 1px solid var(--border);
+  transition: filter .4s;
+}
+.svc-card.featured:hover .featured-img { filter: saturate(0.8) brightness(0.85); }
+.featured-stat {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 4px; padding: 14px 16px;
+}
+.featured-stat-num {
+  font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--green); line-height: 1;
+}
+.featured-stat-label { font-size: 9px; letter-spacing: 1.5px; font-weight: 600; text-transform: uppercase; color: var(--text-dim); }
+
+/* ═══════════════════════════════════════════
+   PHOTO GALLERY
+═══════════════════════════════════════════ */
+.gallery-section { background: var(--bg2); padding: 0; }
+.gallery-header { padding: 64px 48px 40px; }
+
+.gallery-strip {
+  display: flex; overflow: hidden; height: 320px;
+}
+.gallery-item {
+  flex: 1; min-width: 0; position: relative; overflow: hidden;
+  cursor: pointer; transition: flex .55s cubic-bezier(.4,0,.2,1);
+}
+.gallery-item:hover { flex: 3; }
+.gallery-item img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: saturate(0.4) brightness(0.55);
+  transition: filter .45s;
+}
+.gallery-item:hover img { filter: saturate(0.85) brightness(0.8); }
+.gallery-item::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; background: var(--green); z-index: 2;
+  transform: scaleY(0); transform-origin: bottom;
+  transition: transform .4s ease;
+}
+.gallery-item:hover::before { transform: scaleY(1); }
+.gallery-caption {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+  padding: 20px 18px 16px;
+  background: linear-gradient(to top, rgba(2,13,10,0.9) 0%, transparent 100%);
+  opacity: 0; transform: translateY(8px);
+  transition: opacity .35s, transform .35s;
+}
+.gallery-item:hover .gallery-caption { opacity: 1; transform: translateY(0); }
+.gallery-caption-title {
+  font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: #fff; letter-spacing: .5px;
+}
+.gallery-caption-sub { font-size: 8px; letter-spacing: 2px; color: var(--green); text-transform: uppercase; }
+
+/* ═══════════════════════════════════════════
+   COVERAGE / SEGUROS SECTION
+═══════════════════════════════════════════ */
+.coverage-section {
+  background: var(--bg3);
+  padding: 80px 48px;
+}
+.coverage-layout {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start;
+}
+.coverage-left {}
+.coverage-right {}
+
+/* insurer logos grid */
+.insurers-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  margin-top: 32px;
+}
+.insurer-card {
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 6px; padding: 20px 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  transition: border-color .25s, background .25s;
+  text-align: center;
+}
+.insurer-card:hover { border-color: var(--border-g); background: var(--glass-h); }
+.insurer-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: var(--green-glow); border: 1px solid var(--border-g);
+  display: flex; align-items: center; justify-content: center;
+}
+.insurer-icon svg { width: 22px; height: 22px; stroke: var(--green); stroke-width: 1.7; }
+.insurer-name { font-size: 10px; font-weight: 700; letter-spacing: .5px; color: rgba(255,255,255,0.75); }
+.insurer-type { font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); }
+
+/* coverage steps */
+.coverage-steps { display: flex; flex-direction: column; gap: 0; margin-top: 32px; }
+.cov-step {
+  display: flex; gap: 20px; padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+}
+.cov-step:last-child { border-bottom: none; }
+.cov-step-num {
+  font-family: 'Bebas Neue', sans-serif; font-size: 36px; line-height: 1;
+  color: var(--green); opacity: .4; flex-shrink: 0; width: 32px;
+}
+
+.cov-step-body {}
+.cov-step-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.cov-step-desc  { font-size: 10.5px; line-height: 1.75; color: var(--text-dim); }
+
+/* note */
+.coverage-note {
+  margin-top: 28px; padding: 18px 20px;
+  background: rgba(61,219,114,0.06); border: 1px solid var(--border-g);
+  border-radius: 4px; display: flex; gap: 12px; align-items: flex-start;
+}
+.coverage-note svg { width: 18px; height: 18px; stroke: var(--green); flex-shrink: 0; margin-top: 2px; }
+.coverage-note p { font-size: 10.5px; line-height: 1.7; color: rgba(255,255,255,0.6); }
+
+/* ═══════════════════════════════════════════
+   CTA BOTTOM
+═══════════════════════════════════════════ */
+.cta-section {
+  padding: 100px 48px; background: var(--bg);
+  text-align: center; position: relative; overflow: hidden;
+}
+.cta-section::before {
+  content: 'PRIME';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  font-family: 'Bebas Neue', sans-serif; font-size: clamp(100px,18vw,240px);
+  color: transparent; -webkit-text-stroke: 1px rgba(37, 7, 54, 0.03);
+  white-space: nowrap; pointer-events: none; user-select: none;
+}
+.cta-inner { position: relative; z-index: 1; }
+.cta-eyebrow { font-size: 8.5px; letter-spacing: 4px; font-weight: 700; text-transform: uppercase; color: var(--green); margin-bottom: 16px; }
+.cta-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px,5.5vw,74px); line-height:.93; color: #fff; margin-bottom: 20px; }
+.cta-sub { font-size: 12px; line-height: 1.8; color: var(--text-dim); max-width: 440px; margin: 0 auto 36px; font-style: italic; }
+.cta-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--green); color: #020d0a;
+  font-size: 9px; letter-spacing: 2.5px; font-weight: 700; text-transform: uppercase;
+  text-decoration: none; padding: 15px 32px; border-radius: 3px;
+  box-shadow: 0 0 32px rgba(80, 6, 126, 0.28);
+  transition: background .25s, transform .2s, box-shadow .25s;
+}
+.cta-btn:hover { background: #5f0999; transform: translateY(-2px); box-shadow: 0 4px 40px rgba(170, 41, 221, 0.4); }
+.cta-btn svg   { width: 14px; height: 14px; stroke-width: 2.2; }
+
+/* ═══════════════════════════════════════════
+   MOBILE BOTTOM NAV
+═══════════════════════════════════════════ */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(2,13,10,0.95);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+}
+.mbn-inner { display: flex; justify-content: space-around; align-items: center; max-width: 420px; margin: 0 auto; }
+.mbn-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: none; border: none; cursor: pointer;
+  color: rgba(255,255,255,0.38); padding: 4px 12px; min-width: 52px;
+  transition: color .2s;
+}
+.mbn-btn svg   { width: 22px; height: 22px; stroke-width: 1.5; }
+.mbn-btn span  { font-size: 7.5px; letter-spacing: 1px; font-weight: 600; text-transform: uppercase; }
+.mbn-btn.mbn-active { color: var(--green); }
+
+/* ═══════════════════════════════════════════
+   REVEAL ANIMATION
+═══════════════════════════════════════════ */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .65s ease, transform .65s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.r1 { transition-delay: .07s; } .r2 { transition-delay: .14s; }
+.r3 { transition-delay: .21s; } .r4 { transition-delay: .28s; }
+.r5 { transition-delay: .35s; } .r6 { transition-delay: .42s; }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .cards-grid { grid-template-columns: repeat(2, 1fr); }
+  .svc-card.featured { grid-column: span 2; }
+  .coverage-layout { grid-template-columns: 1fr; gap: 48px; }
+}
+@media (max-width: 768px) {
+  .hamburger { display: flex; }
+  .nav-links  { display: none; }
+  .leaf       { left: 135px; width: 50px; }
+  .mobile-bottom-nav { display: block; }
+
+  .hero-content { padding: 0 20px 56px; }
+  .filter-bar   { padding: 0 20px; }
+  .section      { padding: 56px 20px; }
+  .gallery-header { padding: 48px 20px 28px; }
+  .coverage-section { padding: 56px 20px; }
+  .cta-section  { padding: 72px 20px 100px; }
+
+  .cards-grid   { grid-template-columns: 1fr; }
+  .svc-card.featured { grid-column: span 1; grid-template-columns: 1fr; }
+  .featured-right { display: none; }
+
+  .gallery-strip { height: 220px; }
+
+  .insurers-grid { grid-template-columns: repeat(2, 1fr); }
+
+  .footer { padding: 24px 20px 90px; }
+}
+@media (max-width: 480px) {
+  .insurers-grid { grid-template-columns: 1fr 1fr; }
+}
+@supports (padding: max(0px)) {
+  nav { padding-top: max(16px, env(safe-area-inset-top)); }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ NAV ═══════════ -->
+<nav>
+  <div class="logo">
+    <span class="logo-line">HOSPI<span class="g">TAL</span></span>
+    <span class="logo-line"><span class="logo-arrow">&#8592;</span>BIENE<span class="g">STAR</span></span>
+    <span class="logo-sub">Tu salud &middot; Prime &middot; Tu vida</span>
+    <svg class="leaf" viewBox="0 0 72 92" fill="none">
+      <path d="M36 4 C55 4,68 22,66 44 C64 64,52 82,36 88 C20 82,8 64,6 44 C4 22,17 4,36 4Z" fill="#2ecc71" opacity=".92"/>
+      <path d="M36 88 C32 65,30 38,36 4" stroke="#1a6b35" stroke-width="2" fill="none"/>
+      <path d="M36 72 C46 60,58 54,66 46" stroke="#1a6b35" stroke-width="1.3" fill="none"/>
+      <path d="M36 55 C48 44,60 38,66 30" stroke="#1a6b35" stroke-width="1.3" fill="none"/>
+      <path d="M36 39 C47 30,57 22,63 14" stroke="#1a6b35" stroke-width="1.3" fill="none"/>
+      <path d="M36 72 C26 60,14 54,6 46" stroke="#1a6b35" stroke-width="1.1" fill="none"/>
+      <path d="M26 16 C14 8,4 18,10 30 C16 40,28 40,36 30 C30 20,26 16,26 16Z" fill="#27ae60" opacity=".85"/>
+      <path d="M26 16 C26 24,30 30,36 30" stroke="#1a6b35" stroke-width="1.2" fill="none"/>
+    </svg>
+  </div>
+  <ul class="nav-links">
+    <li><a href="/index.html">HOME</a></li>
+    <li><a href="/about.html">NOSOTROS</a></li>
+    <li><a href="/servicios.html" class="active">SERVICIOS</a></li>
+    <li><a href="/programas.html">PROGRAMAS</a></li>
+    <li><a href="/citas.html">CITAS</a></li>
+    <li><a href="/login.html">ACCESO</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Menú">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <ul>
+    <li><a href="/index.html">Inicio</a></li>
+    <li><a href="/about.html">Nosotros</a></li>
+    <li><a href="/servicios.html" class="active">Servicios</a></li>
+    <li><a href="/programas.html">Programas</a></li>
+    <li><a href="/citas.html">Citas</a></li>
+    <li><a href="/login.html">Acceso al Sistema</a></li>
+  </ul>
+</div>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero">
+  <video class="hero-video" autoplay muted loop playsinline>
+    <source src="/fondos/13724802_1920_1080_30fps.mp4" type="video/mp4">
+  </video>
+  <div class="hero-overlay"></div>
+  <div class="hero-shimmer"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Hospital Bienestar Prime</p>
+    <h1 class="hero-title">
+      NUESTROS<br>
+      <span class="outline">SERVICIOS</span><br>
+      <span class="accent">CLÍNICOS</span>
+    </h1>
+    <p class="hero-desc">Diagnóstico preciso, tecnología de vanguardia y atención personalizada en cada etapa de tu proceso de salud.</p>
+  </div>
+</section>
+
+<!-- ═══════════ CATEGORY FILTER BAR ═══════════ -->
+<div class="filter-bar" id="filterBar">
+  <button class="filter-tab active" data-cat="lab">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+    Laboratorio Clínico
+  </button>
+  <button class="filter-tab" data-cat="img">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    Imagen y Diagnóstico
+  </button>
+  <button class="filter-tab" data-cat="func">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Estudios Funcionales
+  </button>
+  <button class="filter-tab" data-cat="pat">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    Patología
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════
+   CAT: LABORATORIO CLÍNICO
+═══════════════════════════════════════ -->
+<div class="cat-section active section" id="cat-lab">
+
+  <div class="section-label reveal">Diagnóstico de precisión</div>
+  <h2 class="section-title reveal">LABORATORIO <span class="dim">CLÍNICO</span></h2>
+  <p class="section-body reveal">Análisis clínicos con equipos de última generación y tiempos de respuesta Express. Resultados confiables para decisiones médicas oportunas.</p>
+
+  <div class="cards-grid">
+
+    <!-- Featured card -->
+    <div class="svc-card featured reveal">
+      <div class="featured-left">
+        <div class="svc-icon" style="margin-bottom:22px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+        </div>
+        <div class="svc-title">ANÁLISIS CLÍNICOS COMPLETOS</div>
+        <p class="svc-desc">Perfil completo de laboratorio con biometría hemática, química sanguínea, examen general de orina, perfil lipídico y pruebas de función hepática y renal. Resultados en menos de 4 horas.</p>
+        <div class="svc-tags">
+          <span class="svc-tag">Biometría hemática</span>
+          <span class="svc-tag">Química 27 elementos</span>
+          <span class="svc-tag">Perfil lipídico</span>
+          <span class="svc-tag">Función hepática</span>
+          <span class="svc-tag">Función renal</span>
+        </div>
+        <a class="svc-cta" href="/citas.html">
+          AGENDAR ANÁLISIS
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+        <div class="svc-card-num">01</div>
+      </div>
+      <div class="featured-right">
+        <img class="featured-img" src="https://images.unsplash.com/photo-1579154204601-01588f351e67?w=700&q=80" alt="Laboratorio clínico">
+        <div class="featured-stat">
+          <span class="featured-stat-num">4h</span>
+          <div><div class="featured-stat-label">Tiempo de entrega</div></div>
+        </div>
+        <div class="featured-stat">
+          <span class="featured-stat-num">98%</span>
+          <div><div class="featured-stat-label">Precisión certificada</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="svc-card reveal r1">
+      <div class="svc-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <div class="svc-title">PERFIL CARDIOVASCULAR</div>
+      <p class="svc-desc">Evaluación integral del riesgo cardíaco con colesterol total, HDL, LDL, triglicéridos, homocisteína y proteína C reactiva de alta sensibilidad.</p>
+      <div class="svc-tags">
+        <span class="svc-tag">Colesterol total</span>
+        <span class="svc-tag">HDL / LDL</span>
+        <span class="svc-tag">PCR</span>
+      </div>
+      <a class="svc-cta" href="/citas.html">AGENDAR CITA <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a>
+      <div class="svc-card-num">02</div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="svc-card reveal r2">
+      <div class="svc-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div class="svc-title">PERFIL DIABÉTICO</div>
+      <p class="svc-desc">Control y seguimiento de diabetes con glucosa en ayuno, hemoglobina glucosilada (HbA1c), insulina, péptido C y microalbuminuria.</p>
+      <div class="svc-tags">
+        <span class="svc-tag">HbA1c</span>
+        <span class="svc-tag">Glucosa</span>
+        <span class="svc-tag">Insulina</span>
+      </div>
+      <a class="svc-cta" href="/citas.html">AGENDAR CITA <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a>
+      <div class="svc-card-num">03</div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="svc-card reveal r3">
+      <div class="svc-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+      </div>
+      <div class="svc-title">CULTIVOS Y MICROBIOLOGÍA</div>
+      <p class="svc-desc">Identificación y antibiograma de microorganismos en muestras de sangre, orina, esputo, heridas y líquidos corporales con resultados en 24–72 horas.</p>
+      <div class="svc-tags">
+        <span class="svc-tag">Urocultivo</span>
+        <span class="svc-tag">Hemocultivo</span>
+        <span class="svc-tag">Antibiograma</span>
+      </div>
+      <a class="svc-cta" href="/citas.html">AGENDAR CITA <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a>
+      <div class="svc-card-num">04</div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="svc-card reveal r4">
+      <div class="svc-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="svc-title">INMUNOLOGÍA Y SEROLOGÍA</div>
+      <p class="svc-desc">Detección de anticuerpos, alergias, enfermedades autoinmunes y enfermedades infecciosas mediante técnicas ELISA, inmunofluorescencia y Western Blot.</p>
+      <div class="svc-tags">
+        <span class="svc-tag">ELISA</span>
+        <span class="svc-tag">Anticuerpos</span>
+        <span class="svc-tag">Alergias</span>
+      </div>
+      <a class="svc-cta" href="/citas.html">AGENDAR CITA <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a>
+      <div class="svc-card-num">05</div>
+    </div>
+
+    <!-- Card 6 -->
+    <div class="svc-card reveal r5">
+      <div class="svc-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div class="svc-title">HORMONAS Y ENDOCRINOLOGÍA</div>
+      <p class="svc-desc">Panel hormonal completo: tiroides (TSH, T3, T4), cortisol, testosterona, estrógenos, prolactina, FSH, LH y hormona del crecimiento.</p>
+      <div class="svc-tags">
+        <span class="svc-tag">Tiroides</span>
+        <span class="svc-tag">Cortisol</span>
+        <span class="svc-tag">Hormonas sexuales</span>
+      </div>
+      <a class="svc-cta" href="/citas.html">AGENDAR CITA <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a>
+      <div class="svc-card-num">06</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   CAT: IMAGEN Y DIAGNÓSTICO
+═══════════════════════════════════════ -->
+<div class="cat-section section" id="cat-img">
+  <div class="section-label reveal">Alta resolución</div>
+  <h2 class="section-title reveal">IMAGEN Y <span class="dim">DIAGNÓSTICO</span></h2>
+  <p class="section-body reveal">Equipos de imagenología de última generación para diagnósticos precisos y no invasivos en todas las áreas del cuerpo.</p>
+  <div class="cards-grid">
+    <div class="svc-card featured reveal">
+      <div class="featured-left">
+        <div class="svc-icon" style="margin-bottom:22px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <div class="svc-title">RESONANCIA MAGNÉTICA</div>
+        <p class="svc-desc">Resonancia magnética de 3 Tesla para imágenes de alta resolución de cerebro, columna, articulaciones y tejidos blandos. Sin radiación ionizante.</p>
+        <div class="svc-tags">
+          <span class="svc-tag">Cerebro</span><span class="svc-tag">Columna</span>
+          <span class="svc-tag">Articulaciones</span><span class="svc-tag">Abdomen</span>
+        </div>
+        <a class="svc-cta" href="/citas.html">AGENDAR ESTUDIO <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a>
+        <div class="svc-card-num">01</div>
+      </div>
+      <div class="featured-right">
+        <img class="featured-img" src="https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=700&q=80" alt="Resonancia magnética">
+        <div class="featured-stat"><span class="featured-stat-num">3T</span><div><div class="featured-stat-label">Potencia del equipo</div></div></div>
+        <div class="featured-stat"><span class="featured-stat-num">45'</span><div><div class="featured-stat-label">Tiempo promedio</div></div></div>
+      </div>
+    </div>
+    <div class="svc-card reveal r1">
+      <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+      <div class="svc-title">TOMOGRAFÍA (TAC)</div>
+      <p class="svc-desc">Tomografía axial computarizada multicorte para diagnóstico de urgencias, patologías abdominales, torácicas y vasculares con contraste o sin contraste.</p>
+      <div class="svc-tags"><span class="svc-tag">Multicorte</span><span class="svc-tag">Urgencias</span><span class="svc-tag">Vascular</span></div>
+      <a class="svc-cta" href="/citas.html">AGENDAR CITA <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a>
+      <div class="svc-card-num">02</div>
+    </div>
+    <div class="svc-card reveal r2">
+      <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <div class="svc-title">ULTRASONIDO</div>
+      <p class="svc-desc">Ultrasonido abdominal, pélvico, obstétrico, mamario, tiroideo, musculoesquelético y Doppler vascular. Resultado inmediato al término del estudio.</p>
+      <div class="svc-tags"><span class="svc-tag">Obstétrico</span><span class="svc-tag">Mamario</span><span class="svc-tag">Doppler</span></div>
+      <a class="svc-cta" href="/citas.html">AGENDAR CITA <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a>
+      <div class="svc-card-num">03</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   CAT: ESTUDIOS FUNCIONALES
+═══════════════════════════════════════ -->
+<div class="cat-section section" id="cat-func">
+  <div class="section-label reveal">Evaluación funcional</div>
+  <h2 class="section-title reveal">ESTUDIOS <span class="dim">FUNCIONALES</span></h2>
+  <p class="section-body reveal">Monitoreo del comportamiento fisiológico del corazón, pulmones y sistema nervioso en condiciones reales de actividad.</p>
+  <div class="cards-grid">
+    <div class="svc-card reveal r1">
+      <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <div class="svc-title">ELECTROCARDIOGRAMA</div>
+      <p class="svc-desc">Electrocardiograma de reposo y prueba de esfuerzo para evaluación del ritmo cardíaco, isquemia y capacidad funcional del corazón.</p>
+      <div class="svc-tags"><span class="svc-tag">Reposo</span><span class="svc-tag">Esfuerzo</span><span class="svc-tag">Holter 24h</span></div>
+      <a class="svc-cta" href="/citas.html">AGENDAR CITA <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a>
+      <div class="svc-card-num">01</div>
+    </div>
+    <div class="svc-card reveal r2">
+      <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 20h5v-2a3 3 0 0 0-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 0 1 5.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 0 1 9.288 0"/></svg></div>
+      <div class="svc-title">ESPIROMETRÍA</div>
+      <p class="svc-desc">Evaluación de la función pulmonar con medición de capacidad vital, volumen espiratorio forzado y flujo máximo. Diagnóstico de asma y EPOC.</p>
+      <div class="svc-tags"><span class="svc-tag">FVC</span><span class="svc-tag">FEV1</span><span class="svc-tag">EPOC</span></div>
+      <a class="svc-cta" href="/citas.html">AGENDAR CITA <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a>
+      <div class="svc-card-num">02</div>
+    </div>
+    <div class="svc-card reveal r3">
+      <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-linecap="round" stroke-width="2.5"/></svg></div>
+      <div class="svc-title">ELECTROENCEFALOGRAMA</div>
+      <p class="svc-desc">Registro de la actividad eléctrica cerebral para diagnóstico de epilepsia, trastornos del sueño y evaluación neurológica en reposo y con estimulación.</p>
+      <div class="svc-tags"><span class="svc-tag">Epilepsia</span><span class="svc-tag">Sueño</span><span class="svc-tag">Neurológico</span></div>
+      <a class="svc-cta" href="/citas.html">AGENDAR CITA <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a>
+      <div class="svc-card-num">03</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   CAT: PATOLOGÍA
+═══════════════════════════════════════ -->
+<div class="cat-section section" id="cat-pat">
+  <div class="section-label reveal">Análisis tisular</div>
+  <h2 class="section-title reveal">PATOLOGÍA <span class="dim">CLÍNICA</span></h2>
+  <p class="section-body reveal">Estudio microscópico de tejidos y células para diagnóstico certero de enfermedades, con énfasis en detección temprana de procesos oncológicos.</p>
+  <div class="cards-grid">
+    <div class="svc-card reveal r1">
+      <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div class="svc-title">BIOPSIA Y HISTOPATOLOGÍA</div>
+      <p class="svc-desc">Análisis microscópico de tejidos obtenidos por biopsia. Diagnóstico de tumores benignos y malignos, enfermedades inflamatorias e infecciones tisulares.</p>
+      <div class="svc-tags"><span class="svc-tag">Biopsia</span><span class="svc-tag">Oncológico</span><span class="svc-tag">Inflamatorio</span></div>
+      <a class="svc-cta" href="/citas.html">AGENDAR CITA <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a>
+      <div class="svc-card-num">01</div>
+    </div>
+    <div class="svc-card reveal r2">
+      <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+      <div class="svc-title">CITOLOGÍA CERVICOVAGINAL</div>
+      <p class="svc-desc">Estudio de Papanicolaou para detección temprana de lesiones premalignas y malignas del cuello uterino. Resultados en 48 horas hábiles.</p>
+      <div class="svc-tags"><span class="svc-tag">Papanicolaou</span><span class="svc-tag">Preventivo</span><span class="svc-tag">48h</span></div>
+      <a class="svc-cta" href="/citas.html">AGENDAR CITA <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a>
+      <div class="svc-card-num">02</div>
+    </div>
+    <div class="svc-card reveal r3">
+      <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+      <div class="svc-title">INMUNOHISTOQUÍMICA</div>
+      <p class="svc-desc">Caracterización molecular de tumores mediante marcadores específicos para determinar origen, comportamiento biológico y susceptibilidad a tratamientos dirigidos.</p>
+      <div class="svc-tags"><span class="svc-tag">Marcadores</span><span class="svc-tag">Tumoral</span><span class="svc-tag">Molecular</span></div>
+      <a class="svc-cta" href="/citas.html">AGENDAR CITA <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="9 18 15 12 9 6"/></svg></a>
+      <div class="svc-card-num">03</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ GALERÍA ═══════════ -->
+<div class="gallery-section">
+  <div class="gallery-header">
+    <p class="section-label reveal">Nuestras instalaciones</p>
+    <h2 class="section-title reveal">ÁREA DE <span class="dim">DIAGNÓSTICO</span></h2>
+  </div>
+  <div class="gallery-strip">
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1579154204601-01588f351e67?w=600&q=80" alt="Laboratorio">
+      <div class="gallery-caption">
+        <div class="gallery-caption-title">Laboratorio Clínico</div>
+        <div class="gallery-caption-sub">Análisis automatizados</div>
+      </div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=600&q=80" alt="Resonancia">
+      <div class="gallery-caption">
+        <div class="gallery-caption-title">Resonancia 3T</div>
+        <div class="gallery-caption-sub">Alta resolución</div>
+      </div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1551190822-a9333d879b1f?w=600&q=80" alt="Radiología">
+      <div class="gallery-caption">
+        <div class="gallery-caption-title">Sala de Radiología</div>
+        <div class="gallery-caption-sub">Digital DR</div>
+      </div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1666214280557-f1b5022eb634?w=600&q=80" alt="Consultorios">
+      <div class="gallery-caption">
+        <div class="gallery-caption-title">Consultorios</div>
+        <div class="gallery-caption-sub">Atención personalizada</div>
+      </div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&q=80" alt="Ultrasonido">
+      <div class="gallery-caption">
+        <div class="gallery-caption-title">Sala de Ultrasonido</div>
+        <div class="gallery-caption-sub">Tiempo real</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ COBERTURA / SEGUROS ═══════════ -->
+<section class="coverage-section">
+  <div class="coverage-layout">
+
+    <!-- Left: aseguradoras -->
+    <div class="coverage-left">
+      <p class="section-label reveal">Convenios vigentes</p>
+      <h2 class="section-title reveal">COBERTURA Y <span class="dim">SEGUROS</span></h2>
+      <p class="section-body reveal" style="margin-bottom:0">Trabajamos con las principales aseguradoras del país. Verifica tu cobertura antes de tu cita y evita trámites innecesarios.</p>
+
+      <div class="insurers-grid">
+        <div class="insurer-card reveal r1">
+          <div class="insurer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div class="insurer-name">GNP Seguros</div>
+          <div class="insurer-type">Gastos Médicos</div>
+        </div>
+        <div class="insurer-card reveal r2">
+          <div class="insurer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div class="insurer-name">AXA México</div>
+          <div class="insurer-type">Gastos Médicos</div>
+        </div>
+        <div class="insurer-card reveal r3">
+          <div class="insurer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div class="insurer-name">Metlife</div>
+          <div class="insurer-type">Vida y Salud</div>
+        </div>
+        <div class="insurer-card reveal r4">
+          <div class="insurer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div class="insurer-name">Seguros BBVA</div>
+          <div class="insurer-type">Gastos Médicos</div>
+        </div>
+        <div class="insurer-card reveal r5">
+          <div class="insurer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div class="insurer-name">Mapfre</div>
+          <div class="insurer-type">Salud Integral</div>
+        </div>
+        <div class="insurer-card reveal r6">
+          <div class="insurer-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div class="insurer-name">IMSS / ISSSTE</div>
+          <div class="insurer-type">Convenio Especial</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: pasos -->
+    <div class="coverage-right">
+      <p class="section-label reveal">¿Cómo funciona?</p>
+      <h2 class="section-title reveal" style="font-size:clamp(28px,3.5vw,48px)">USAR TU <span class="dim">SEGURO</span></h2>
+
+      <div class="coverage-steps">
+        <div class="cov-step reveal">
+          <div class="cov-step-num">01</div>
+          <div class="cov-step-body">
+            <div class="cov-step-title">Agenda tu cita</div>
+            <div class="cov-step-desc">Selecciona el servicio o estudio que necesitas y agenda tu cita en línea o por teléfono indicando que cuentas con seguro médico.</div>
+          </div>
+        </div>
+        <div class="cov-step reveal r1">
+          <div class="cov-step-num">02</div>
+          <div class="cov-step-body">
+            <div class="cov-step-title">Presenta tu póliza</div>
+            <div class="cov-step-desc">Al llegar a la clínica, presenta tu póliza de seguro vigente y una identificación oficial. Nuestro equipo gestionará la autorización.</div>
+          </div>
+        </div>
+        <div class="cov-step reveal r2">
+          <div class="cov-step-num">03</div>
+          <div class="cov-step-body">
+            <div class="cov-step-title">Autorización directa</div>
+            <div class="cov-step-desc">Contactamos directamente a tu aseguradora para obtener la carta de autorización. Tú solo esperas sin hacer trámites adicionales.</div>
+          </div>
+        </div>
+        <div class="cov-step reveal r3">
+          <div class="cov-step-num">04</div>
+          <div class="cov-step-body">
+            <div class="cov-step-title">Recibe tu atención</div>
+            <div class="cov-step-desc">Una vez autorizado, recibes tu servicio sin necesidad de pago anticipado. El cargo se liquida directamente con la aseguradora.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="coverage-note reveal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16" stroke-linecap="round" stroke-width="2.5"/></svg>
+        <p>Para servicios de laboratorio con pago particular, ofrecemos precios preferenciales y planes de pago. Consulta con admisión al momento de tu llegada.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════ CTA ═══════════ -->
+<section class="cta-section">
+  <div class="cta-inner reveal">
+    <p class="cta-eyebrow">Da el siguiente paso</p>
+    <h2 class="cta-title">AGENDA TU<br>ESTUDIO HOY</h2>
+    <p class="cta-sub">Nuestro equipo de admisión te orientará sobre el estudio más adecuado para tu situación. Sin listas de espera largas.</p>
+    <a class="cta-btn" href="/citas.html">
+      SOLICITAR CITA
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+  </div>
+</section>
+
+<!-- ═══════════ MOBILE BOTTOM NAV ═══════════ -->
+<div class="mobile-bottom-nav">
+  <div class="mbn-inner">
+    <button class="mbn-btn" onclick="location.href='/index.html'">
+      <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span>Inicio</span>
+    </button>
+    <button class="mbn-btn" onclick="location.href='/citas.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Citas</span>
+    </button>
+    <button class="mbn-btn mbn-active" onclick="location.href='/servicios.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+      <span>Servicios</span>
+    </button>
+    <button class="mbn-btn" onclick="location.href='/login.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span>Acceso</span>
+    </button>
+  </div>
+</div>
+
+<script>
+/* ─── HAMBURGER ─── */
+const hamburger  = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('open');
+  mobileMenu.classList.toggle('open');
+});
+mobileMenu.querySelectorAll('a').forEach(a =>
+  a.addEventListener('click', () => {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+  })
+);
+
+/* ─── CATEGORY FILTER TABS ─── */
+document.querySelectorAll('.filter-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.cat-section').forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('cat-' + tab.dataset.cat).classList.add('active');
+    // re-trigger reveal for newly visible elements
+    observeReveals();
+  });
+});
+
+/* ─── SCROLL REVEAL ─── */
+function observeReveals() {
+  const els = document.querySelectorAll('.reveal:not(.visible)');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.1 });
+  els.forEach(el => obs.observe(el));
+}
+observeReveals();
+</script>
+</body>
+</html>
